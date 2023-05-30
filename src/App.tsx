@@ -1,12 +1,31 @@
 import './App.css';
-import React, {useEffect, useState} from 'react'
+import React, {ReactNode, useEffect, useState} from 'react'
 import {DataGrid, GridColDef, GridValueGetterParams} from '@mui/x-data-grid'
-import ChipInput from "material-ui-chip-input";
-import { Menu } from '@material-ui/core';
+import ChipInput from "material-ui-chip-input"
+import {Autocomplete, Chip, ChipProps, TextField} from "@mui/material"
+import {Simulate} from "react-dom/test-utils";
+import focus = Simulate.focus;
+
+const FILTER_NAME = ['name', 'owner', 'uuid', 'mac', 'vendor', 'model']
+
+
+const customStyle = {
+    filter: {
+        display: 'flex',
+        alignItems: 'end',
+        marginBottom: '10px'
+    },
+    chips: {
+        display: 'flex',
+    },
+    autocomplete: {
+        width: '100%',
+    },
+}
 
 
 
-/** data from table and config data column==========================*/
+/** data from table and config data column================================================*/
 interface RowType {
     id: number,
     accounts: any[],
@@ -49,6 +68,7 @@ const rowsTest: RowType[] = [
     {id: 0, accounts:[], aliases:[], description:null, deviceTags:[], firmwareInfo:null, lastRequestDatetime:"2023-05-24 07:54:48Z", model:null, name:"test4", provide:"U", type:"VOIP_MOBILE_PHONE", uuid:"42d22cda-105c-4b56-9f44-075f7c82547b", vendor:'test vendor4', virtual:true,},
     {id: 0, accounts:[], aliases:[], description:null, deviceTags:[], firmwareInfo:null, lastRequestDatetime:"2023-05-24 07:54:48Z", model:null, name:"test5", provide:"U", type:"VOIP_MOBILE_PHONE", uuid:"52d22cda-105c-4b56-9f44-075f7c82547b", vendor:'test vendor5', virtual:true,},
 ]
+/** data from table and config data column================================================*/
 
 
 
@@ -68,10 +88,8 @@ function App() {
         setDataMainTable(rowsTest)
     }
 
-
-
-
-    /** function for table event====================================*/
+    
+    /** function for table event====================================================================*/
     /** change checkbox*/
     function handleSelectionModelChange(newSelection: any[]) {
         if (dataMainTable) {
@@ -82,65 +100,122 @@ function App() {
     }
     /** paginator change*/
     function handlePageChange(params: { page: number, pageSize: number }) {
-        console.log(params)
+        // console.log(params)
     }
+    /** function for table event====================================================================*/
 
 
 
 
-    const [anchorEl, setAnchorEl] = useState(null);
-    const handleClick = (event: any) => {
-        setAnchorEl(event.currentTarget);
-    };
 
 
 
 
+
+    const [allChips, setAllChips] = useState<{detail: string, value: string}[]>([])
+    
+    /** event and options for autocomplete=========================================================*/
+    const defaultPropsAutocomplete = {
+        options: FILTER_NAME,
+        getOptionLabel: (option: string) => option,
+    }
+    const changeAutocomplete = (event: any) => {
+        /** делаем асинхронно, чтобы выбранный чипс из селекта успел встать в инпут*/
+        setTimeout(() => {
+            const inputData: string = event.target.value
+            if (inputData) {
+                /** functionality for serial saving chips and tags*/
+                if (FILTER_NAME.includes(inputData) && !(allChips.slice(-1)[0])) {
+                        setAllChips([...allChips, {detail: 'tag', value: inputData}])
+                        event.target.value = ''
+                } else if (allChips.slice(-1)[0]?.detail === 'tag') {
+                        setAllChips([...allChips, {detail: 'chip', value: inputData}])
+                        event.target.value = ''
+                } else if (allChips.slice(-1)[0]?.detail === 'chip' && FILTER_NAME.includes(inputData)) {
+                    setAllChips([...allChips, {detail: 'tag', value: inputData}])
+                    event.target.value = ''
+                }
+            }
+        }, 100)
+    }
+    /** event and options for autocomplete=========================================================*/
+
+    
+    /** event and options for chips================================================================*/
+    // TODO: сейчас  дропаются все чипсы с одинаковым названгием, исправить
+    const handleDelete = (deleteChip: string) => {
+        const allChopsAfterDelete = allChips.filter((chip) => chip.value !== deleteChip)
+        setAllChips(allChopsAfterDelete)
+    }
+    const generateChips = allChips.map((itemChips: {detail: string, value: string}, index: number) => {
+        if (itemChips.detail === 'tag') {
+            return (
+                <Chip key={index} label={itemChips.value}
+                      style={allChips.length > index+1
+                          ? {backgroundColor: '#179bff', color: 'white', borderRadius: '10px 0px 0px 10px'}
+                          : {backgroundColor: '#179bff', color: 'white', marginRight: '10px'}}
+                      onDelete={allChips.length > index+1 ? undefined : () => handleDelete(itemChips.value)}
+                />
+            )
+        } else {
+            return (
+                <Chip key={index} label={itemChips.value}
+                      style={{backgroundColor: '#ececec', color: 'black', borderRadius: '0px 10px 10px 0px', marginRight: '5px'}}
+                      onDelete={() => handleDelete(itemChips.value)}
+                />
+            )
+        }
+
+    })
+    /** event and options for chips================================================================*/
+    
+    
+    
     return (
         <div className="App">
 
-            <ChipInput
-                onClick={handleClick}
-                dataSource={['test1', 'test2']}
-                fullWidth
-                label='Fish and chips'
-                placeholder='Type and press enter to add chips'
-                newChipKeyCodes={[13,188,186]}
-                onBeforeAdd={(val) => {
-                    console.log(val)
-                    if(val === 'abc') return false;
-                    return true;
-                }}
-            />
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-            >
-                <div className="">sdfsdfsd</div>
-                <div className="">sdfsdfsd</div>
-                <div className="">sdfsdfsd</div>
-            </Menu>
 
 
+            <div className="main_table">
+                {/** filter table allData*/}
+                <div style={customStyle.filter}>
+                    <div style={customStyle.chips}>
+                        {generateChips}
+                    </div>
+                    <div style={customStyle.autocomplete}>
+                        <Autocomplete
+                            {...defaultPropsAutocomplete}
+                            renderInput={(params) => (
+                                <TextField {...params}
+                                           label="Поиск"
+                                           variant="standard"
+                                />
+                            )}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') changeAutocomplete(e)
+                            }}
+                        />
+                    </div>
+                </div>
+                {/** table with all data*/}
+                <div style={{height: "auto", maxHeight: 400, width: '100%', marginBottom: 50}}>
+                    {dataMainTable && <DataGrid
+                        rows={dataMainTable} columns={columnsConfig}
+                        initialState={{
+                            pagination: {
+                                paginationModel: {page: 0, pageSize: 2},
+                            },
+                        }}
+                        pageSizeOptions={[2, 5, 10]} checkboxSelection
+                        columnVisibilityModel={{id: false}}
 
-
-            {/** table with all data*/}
-            <div style={{height: "auto", maxHeight: 400, width: '100%', marginBottom: 50}}>
-                {dataMainTable && <DataGrid
-                    rows={dataMainTable} columns={columnsConfig}
-                    initialState={{
-                        pagination: {
-                            paginationModel: {page: 0, pageSize: 2},
-                        },
-                    }}
-                    pageSizeOptions={[2, 5, 10]} checkboxSelection
-                    columnVisibilityModel={{id: false}}
-
-                    onRowSelectionModelChange={handleSelectionModelChange}
-                    onPaginationModelChange={handlePageChange}
-                />}
+                        onRowSelectionModelChange={handleSelectionModelChange}
+                        onPaginationModelChange={handlePageChange}
+                    />}
+                </div>
             </div>
+
+
 
 
 
@@ -152,7 +227,6 @@ function App() {
                 placeholder='Type and press enter to add chips'
                 newChipKeyCodes={[13,188,186]}
                 onBeforeAdd={(val) => {
-                    console.log(val)
                     if(val == 'abc') return false;
                     return true;
                 }}
