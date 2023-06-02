@@ -67,9 +67,9 @@ interface RowType {
     virtual: boolean,
 }
 const columnsConfigMain: GridColDef[] = [
-    {field: 'uuid', headerName: 'uuid', width: 200, description: 'Test desc', sortable: false},
-    {field: 'name', headerName: 'Device name', width: 130, description: 'Test desc', sortable: false},
-    {field: 'vendor', headerName: 'Vendor', width: 130, description: 'Test desc', sortable: false},
+    {field: 'uuid', headerName: 'uuid', width: 290, description: 'Test desc', sortable: false},
+    {field: 'name', headerName: 'Device name', width: 110, description: 'Test desc', sortable: false},
+    {field: 'vendor', headerName: 'Vendor', width: 100, description: 'Test desc', sortable: false},
     {field: 'model', headerName: 'Model', width: 130, description: 'Test desc', sortable: false},
     {
         field: 'accounts', headerName: 'Device owner',
@@ -83,9 +83,9 @@ const columnsConfigMain: GridColDef[] = [
     },
 ]
 const columnsConfigSelect: GridColDef[] = [
-    {field: 'uuid', headerName: 'uuid', width: 200, description: 'Test desc', sortable: false},
-    {field: 'name', headerName: 'Device name', width: 130, description: 'Test desc', sortable: false},
-    {field: 'vendor', headerName: 'Vendor', width: 130, description: 'Test desc', sortable: false},
+    {field: 'uuid', headerName: 'uuid', width: 290, description: 'Test desc', sortable: false},
+    {field: 'name', headerName: 'Device name', width: 110, description: 'Test desc', sortable: false},
+    {field: 'vendor', headerName: 'Vendor', width: 100, description: 'Test desc', sortable: false},
     {field: 'model', headerName: 'Model', width: 130, description: 'Test desc', sortable: false},
     {
         field: 'accounts', headerName: 'Device owner',
