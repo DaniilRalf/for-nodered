@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
     DataGrid,
     GridCellParams,
     GridColDef,
     GridRenderCellParams,
-    GridRowId,
     GridValueGetterParams
 } from '@mui/x-data-grid'
 import { Autocomplete, AutocompleteRenderInputParams, Chip, TextField } from "@mui/material"
@@ -12,7 +11,6 @@ import PhonelinkEraseIcon from '@mui/icons-material/PhonelinkErase'
 
 let FOR_FILTER_MAIN_TABLE = ['name', 'uuid', 'mac', 'vendor', 'model']
 let FOR_FILTER_SELECT_TABLE = ['name', 'uuid', 'mac', 'vendor', 'model']
-
 
 const customStyle = {
     filter: {
@@ -28,6 +26,20 @@ const customStyle = {
     autocomplete: {
         minWidth: '300px'
     },
+    table: {
+        height: "auto",
+        maxHeight: 400,
+        width: '100%',
+        marginBottom: 50
+    },
+    chip: {
+        backgroundColor: '#ececec',
+        color: 'black',
+        borderRadius: '0px 10px 10px 0px',
+        marginRight: '5px'
+    },
+    tagOnce: {backgroundColor: '#179bff', color: 'white', marginRight: '10px'},
+    tagSplice: {backgroundColor: '#179bff', color: 'white', borderRadius: '10px 0px 0px 10px'},
 }
 
 const customStyleMaterial = `
@@ -54,7 +66,6 @@ interface RowType {
     vendor: string | null,
     virtual: boolean,
 }
-
 const columnsConfigMain: GridColDef[] = [
     {field: 'uuid', headerName: 'uuid', width: 200, description: 'Test desc', sortable: false},
     {field: 'name', headerName: 'Device name', width: 130, description: 'Test desc', sortable: false},
@@ -102,17 +113,16 @@ const rowsTest: RowType[] = [
 
 
 
-
-
 function App() {
 
     const [dataMainTable, setDataMainTable] = useState<RowType[]>()
+    const [allChipsMainTable, setAllChipsMainTable] = useState<{ detail: string, value: string }[]>([])
     const [selectedRows, setSelectedRows] = useState<string[]>([])
 
     const [dataSelectTable, setDataSelectTable] = useState<RowType[]>()
-
-    const [allChipsMainTable, setAllChipsMainTable] = useState<{ detail: string, value: string }[]>([])
     const [allChipsSelectTable, setAllChipsSelectTable] = useState<{ detail: string, value: string }[]>([])
+    const [filterSelectTableData, setFilterSelectTableData] = useState<{[key: string]: string}>({})
+    const [viewsSelectTable, setViewsSelectTable] = useState<RowType[]>()
 
     useEffect((): void => {
         generateMainData()
@@ -123,10 +133,30 @@ function App() {
     }
 
 
-    /** GENERAL function========================================================================*/
-
-    /** GENERAL function========================================================================*/
-
+    /** GLOBAL function=======================================================================*/
+    const generateDataForFiltered = (data: { detail: string, value: string }[], table: string): void => {
+        const result = {} as any
+        for (let i = 0; i < data.length; i += 2) {
+            const key = data[i].value
+            const value = data[i + 1].value
+            result[key] = value
+        }
+        setFilterSelectTableData(result)
+    }
+    /** cортировка Select таблицы*/
+    useMemo(() => {
+        let afterFilterDataSelectTable: RowType[] = []
+        if (Object.keys(filterSelectTableData).length > 0) {
+            for (let [key, value] of Object.entries(filterSelectTableData)) {
+                // @ts-ignore
+                afterFilterDataSelectTable = dataSelectTable!.filter((itemRow: RowType) => itemRow[key]?.includes(value))
+            }
+        } else {
+            afterFilterDataSelectTable = dataSelectTable!
+        }
+        setViewsSelectTable(afterFilterDataSelectTable)
+    }, [filterSelectTableData, selectedRows])
+    /** GLOBAL function=======================================================================*/
 
 
     /** MAIN table function=====================================================================*/
@@ -199,27 +229,21 @@ function App() {
             return (
                 <Chip key={index} label={itemChips.value}
                       style={allChipsMainTable.length > index + 1
-                          ? {backgroundColor: '#179bff', color: 'white', borderRadius: '10px 0px 0px 10px'}
-                          : {backgroundColor: '#179bff', color: 'white', marginRight: '10px'}}
+                          ? customStyle.tagSplice
+                          : customStyle.tagOnce}
                       onDelete={allChipsMainTable.length > index + 1 ? undefined : () => handleDeleteMainTable(itemChips, index)}
                 />
             )
         } else {
             return (
                 <Chip key={index} label={itemChips.value}
-                      style={{
-                          backgroundColor: '#ececec',
-                          color: 'black',
-                          borderRadius: '0px 10px 10px 0px',
-                          marginRight: '5px'
-                      }}
+                      style={customStyle.chip}
                       onDelete={() => handleDeleteMainTable(itemChips, index)}
                 />
             )
         }
     })
     /** MAIN table function=====================================================================*/
-
 
 
     /** SELECT table function===================================================================*/
@@ -246,6 +270,7 @@ function App() {
                 } else if (allChipsSelectTable.slice(-1)[0]?.detail === 'tag') {
                     setAllChipsSelectTable([...allChipsSelectTable, {detail: 'chip', value: inputData}])
                     event.target.value = ''
+                    generateDataForFiltered([...allChipsSelectTable, {detail: 'chip', value: inputData}], 'select') /** фильтруем таблицу*/
                 } else if (allChipsSelectTable.slice(-1)[0]?.detail === 'chip' && FOR_FILTER_SELECT_TABLE.includes(inputData)) {
                     setAllChipsSelectTable([...allChipsSelectTable, {detail: 'tag', value: inputData}])
                     event.target.value = ''
@@ -262,6 +287,7 @@ function App() {
             /** добавление элементом назад в массив*/
             FOR_FILTER_SELECT_TABLE.push(allElementsAfterDelete[indexElement - 1].value)
             allElementsAfterDelete.splice((indexElement - 1), 2)
+            generateDataForFiltered(allElementsAfterDelete, 'select') /** фильтруем таблицу*/
         } else if (deleteChip.detail === 'tag') {
             /** добавление элементом назад в массив*/
             FOR_FILTER_SELECT_TABLE.push(deleteChip.value)
@@ -278,28 +304,21 @@ function App() {
             return (
                 <Chip key={index} label={itemChips.value}
                       style={allChipsSelectTable.length > index + 1
-                          ? {backgroundColor: '#179bff', color: 'white', borderRadius: '10px 0px 0px 10px'}
-                          : {backgroundColor: '#179bff', color: 'white', marginRight: '10px'}}
+                          ? customStyle.tagSplice
+                          : customStyle.tagOnce}
                       onDelete={allChipsSelectTable.length > index + 1 ? undefined : () => handleDeleteSelectTable(itemChips, index)}
                 />
             )
         } else {
             return (
                 <Chip key={index} label={itemChips.value}
-                      style={{
-                          backgroundColor: '#ececec',
-                          color: 'black',
-                          borderRadius: '0px 10px 10px 0px',
-                          marginRight: '5px'
-                      }}
+                      style={customStyle.chip}
                       onDelete={() => handleDeleteSelectTable(itemChips, index)}
                 />
             )
         }
     })
     /** SELECT table function===================================================================*/
-
-
 
 
     return (
@@ -325,7 +344,7 @@ function App() {
                     </div>
                 </div>
                 {/** table with all data*/}
-                <div style={{height: "auto", maxHeight: 400, width: '100%', marginBottom: 50}}>
+                <div style={customStyle.table}>
                     {dataMainTable && <DataGrid
                         getRowId={(row) => row.uuid}
                         rows={dataMainTable} columns={columnsConfigMain}
@@ -368,10 +387,10 @@ function App() {
                     </div>
                 </div>}
                 {/** table with select data*/}
-                <div style={{height: "auto", maxHeight: 400, width: '100%', marginBottom: 50}}>
-                    {dataSelectTable && dataSelectTable.length > 0 && <DataGrid
+                <div style={customStyle.table}>
+                    {viewsSelectTable && viewsSelectTable.length > 0 && <DataGrid
                         getRowId={(row) => row.uuid}
-                        rows={dataSelectTable} columns={columnsConfigSelect}
+                        rows={viewsSelectTable} columns={columnsConfigSelect}
                         initialState={{
                             pagination: {
                                 paginationModel: {page: 0, pageSize: 5},
@@ -395,7 +414,6 @@ function App() {
 
             <style>{customStyleMaterial}</style>
         </div>
-    );
+    )
 }
-
-export default App;
+export default App
