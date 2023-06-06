@@ -6,7 +6,7 @@ import {
     GridRenderCellParams,
     GridValueGetterParams
 } from '@mui/x-data-grid'
-import { Autocomplete, AutocompleteRenderInputParams, Chip, TextField } from "@mui/material"
+import { Autocomplete, AutocompleteRenderInputParams, Button, Chip, Stack, TextField } from "@mui/material"
 import PhonelinkEraseIcon from '@mui/icons-material/PhonelinkErase'
 
 let FOR_FILTER_MAIN_TABLE = ['name', 'uuid', 'mac', 'vendor', 'model']
@@ -40,6 +40,10 @@ const customStyle = {
     },
     tagOnce: {backgroundColor: '#179bff', color: 'white', marginRight: '10px'},
     tagSplice: {backgroundColor: '#179bff', color: 'white', borderRadius: '10px 0px 0px 10px'},
+    btnGroup: {
+        display: 'flex',
+        justifyContent: 'end',
+    }
 }
 
 const customStyleMaterial = `
@@ -409,6 +413,9 @@ function App() {
                         }}
                     />}
                 </div>
+                {viewsSelectTable && viewsSelectTable.length > 0 && <div style={customStyle.btnGroup}>
+                    <Button variant="contained">Применить</Button>
+                </div>}
             </div>
 
 
