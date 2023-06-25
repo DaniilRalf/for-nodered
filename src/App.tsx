@@ -6,8 +6,13 @@ import {
     GridRenderCellParams,
     GridValueGetterParams
 } from '@mui/x-data-grid'
-import { Autocomplete, AutocompleteRenderInputParams, Button, Chip, Stack, TextField } from "@mui/material"
+import { Autocomplete, AutocompleteRenderInputParams, Button, Chip, TextField } from "@mui/material"
 import PhonelinkEraseIcon from '@mui/icons-material/PhonelinkErase'
+
+// import Pagination from 'rc-pagination';
+
+import { Pagination, Select } from 'antd';
+// const { Option } = Select;
 
 let FOR_FILTER_MAIN_TABLE = ['name', 'uuid', 'mac', 'vendor', 'model']
 let FOR_FILTER_SELECT_TABLE = ['name', 'uuid', 'mac', 'vendor', 'model']
@@ -51,7 +56,29 @@ const customStyleMaterial = `
         display: flex;
         flex-direction: column;
     }
+    .MuiDataGrid-selectedRowCount {
+        display: none;
+    }
+  
+    .ant-pagination {transform: translateY(-43px)}
 `
+
+const localePagination = {
+    // Options.jsx
+    items_per_page: '/ page',
+    jump_to: 'Go to',
+    jump_to_confirm: 'confirm',
+    page: 'Page',
+
+    // Pagination.jsx
+    prev_page: 'Previous Page',
+    next_page: 'Next Page',
+    prev_5: 'Previous 5 Pages',
+    next_5: 'Next 5 Pages',
+    prev_3: 'Previous 3 Pages',
+    next_3: 'Next 3 Pages',
+    page_size: 'Page Size',
+}
 
 
 /** data from table and config data column================================================*/
@@ -178,10 +205,10 @@ function App() {
             handleSelectionModelChange(selectedRowsNew)
         }
     }
-    /** paginator change*/
-    function handlePageChangeMainTable(params: { page: number, pageSize: number }): void {
-        // console.log(params)
-    }
+    // /** paginator change*/
+    // function handlePageChangeMainTable(params: { page: number, pageSize: number }): void {
+    //     // console.log(params)
+    // }
     /** event and options for autocomplete*/
     const defaultPropsAutocompleteMainTable = {
         options: (allChipsMainTable.slice(-1)[0]?.detail === 'tag') ? [] : FOR_FILTER_MAIN_TABLE,
@@ -325,6 +352,19 @@ function App() {
     /** SELECT table function===================================================================*/
 
 
+
+    /** paginator change*/
+    // function onShowSizeChange(current: number, pageSize: number): void {
+    //     // console.log(current);
+    //     // console.log(pageSize);
+    // }
+    function onChange(current: number, pageSize: number): void {
+        console.log("onChange:current=", current);
+        console.log("onChange:pageSize=", pageSize);
+    }
+
+
+
     return (
         <div className="App">
 
@@ -352,19 +392,37 @@ function App() {
                     {dataMainTable && <DataGrid
                         getRowId={(row) => row.uuid}
                         rows={dataMainTable} columns={columnsConfigMain}
-                        initialState={{
-                            pagination: {
-                                paginationModel: {page: 0, pageSize: 10},
-                            },
-                        }}
-                        pageSizeOptions={[2, 5, 10]} checkboxSelection
+                        hideFooterPagination={true}
                         disableColumnFilter={true}
 
-                        onPaginationModelChange={handlePageChangeMainTable}
-
+                        checkboxSelection
                         rowSelectionModel={selectedRows}
                         onRowSelectionModelChange={handleSelectionModelChange}
+
+
+
                     />}
+                    {/*{dataMainTable && <Pagination className="ant-pagination"*/}
+                    {/*                              defaultCurrent={3} //active page number*/}
+                    {/*                              total={450} //count all elements*/}
+                    {/*                              locale={localePagination}*/}
+                    {/*                              pageSizeOptions={[10, 25, 50]} //page sizer*/}
+
+                    {/*                              onShowSizeChange={onShowSizeChange} //change page-size*/}
+                    {/*                              onChange={onChange} //change page*/}
+                    {/*/>}*/}
+                    {dataMainTable && <>
+                        <Pagination
+                            className="ant-pagination"
+                            defaultCurrent={3} //active page number
+                            total={450} //count all elements
+                            locale={localePagination}
+                            pageSize={10}
+                            pageSizeOptions={[10, 25, 50]} //page sizer
+                            // onShowSizeChange={onShowSizeChange} //change page-size
+                            onChange={onChange} //change all
+                        />
+                    </>}
                 </div>
             </div>
 
