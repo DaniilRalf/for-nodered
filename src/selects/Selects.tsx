@@ -27,7 +27,7 @@ function Selects() {
         }
     }
 
-    const models = [
+    const modelsList = [
             {value: 'test0', label: 'test0'},
             {value: 'test1', label: 'test1'},
             {value: 'test2', label: 'test2'},
@@ -80,7 +80,7 @@ function Selects() {
                         filterSort={(optionA, optionB) =>
                             (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
                         }
-                        options={models}
+                        options={modelsList}
                         onChange={(value: any, option: any) => changeSelects(value, option, item.index)}
                 /><CloseOutlined onClick={() => onRemoveModel(item.index)}/>
             </div>
