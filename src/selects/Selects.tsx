@@ -7,10 +7,31 @@ function Selects() {
 
     //TODO: подготовить переводы
 
+    const customStyleMaterial = `
+        .main {
+           ::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+           ::-webkit-scrollbar-track {
+                -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+                background-color: #f9f9fd;
+                border-radius: 10px;
+           }
+           ::-webkit-scrollbar-thumb {
+                background-color: #4398dd;
+                border-radius: 10px;
+           }
+        }
+    `
+
     const customStyle = {
         selectList: {
             display: 'flex',
             flexDirection: 'column' as 'column',
+            paddingRight: '10px',
+            maxHeight: '660px',
+            overflowY: 'auto' as 'auto'
         },
         selectBlock: {
             display: 'flex',
@@ -40,6 +61,7 @@ function Selects() {
     // const [quantityModel, setQuantityModel] = useState<any[]>([{index: Date.parse(new Date().toISOString()), value: ''}])
 
     useEffect(() => {
+        console.log(quantityModel)
         //TODO: вот на этом моменте отсортировать все елементы которые не содержат value и сохранять в глобальную область видимости
     }, [quantityModel])
 
@@ -94,12 +116,13 @@ function Selects() {
 
 
     return (
-        <div className="selects">
+        <div className="main">
             <Button  style={customStyle.addModelBtn} icon={<PlusOutlined />}
                      type="primary" shape="round" size={'large'}
                      onClick={() => onAddModel()}
             >Добавить модель</Button>
             {constructSelectList()}
+            <style>{customStyleMaterial}</style>
         </div>
     )
 }
