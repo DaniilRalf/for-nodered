@@ -3,6 +3,9 @@ import { Select } from "antd"
 import { Button } from 'antd'
 import { PlusOutlined, CloseOutlined } from '@ant-design/icons'
 
+interface ModelListInterface { value: string, label: string, }
+interface QuantityModelInterface { index: number, value: string, }
+
 function Selects() {
 
     //TODO: подготовить переводы
@@ -24,7 +27,6 @@ function Selects() {
            }
         }
     `
-
     const customStyle = {
         selectList: {
             display: 'flex',
@@ -48,32 +50,30 @@ function Selects() {
         }
     }
 
-    const modelsList = [
+    const [modelList, setModelList] = useState<ModelListInterface[]>([])
+    const [quantityModel, setQuantityModel] = useState<QuantityModelInterface[]>([])
+
+    useEffect((): void => {
+        //TODO: вот на этом моменте делаем запрос и получаем все модели
+        const testList: ModelListInterface[] = [
             {value: 'test0', label: 'test0'},
             {value: 'test1', label: 'test1'},
             {value: 'test2', label: 'test2'},
             {value: 'test3', label: 'test3'},
             {value: 'test4', label: 'test4'},
-    ]
+        ]
+        setModelList(testList)
+    }, [])
 
-    //TODO: create types
-    const [quantityModel, setQuantityModel] = useState<any[]>([])
-    // const [quantityModel, setQuantityModel] = useState<any[]>([{index: Date.parse(new Date().toISOString()), value: ''}])
-
-    useEffect(() => {
-        console.log(quantityModel)
-        //TODO: вот на этом моменте отсортировать все елементы которые не содержат value и сохранять в глобальную область видимости
+    useEffect((): void => {
+        const sortQuantityModel = quantityModel.filter((itemModel: QuantityModelInterface) => !!itemModel.value)
+        //TODO: вот на этом моменте отсортировали все елементы которые не содержат value и сохранять в глобальную область видимости
+        console.log(sortQuantityModel)
     }, [quantityModel])
 
 
 
-
-
-
-
-
-
-    const changeSelects = (_value: any, option: any, index: any): void => {
+    const changeSelects = (_value: any, option: any, index: number): void => {
         const newArray = quantityModel.map(item => {
             if (item.index === index) {
                 item.value = option.value
@@ -90,10 +90,8 @@ function Selects() {
         setQuantityModel(newArray)
     }
 
-
-    //TODO: добавить типизацию
     const constructSelectList = (): ReactElement => {
-        const construct = quantityModel.map((item: any) => {
+        const construct: JSX.Element[] = quantityModel.map((item: QuantityModelInterface) => {
             return <div style={customStyle.selectBlock} key={item.index}>
                 <Select style={customStyle.selectItem}
                         showSearch placeholder="Выберите модель"
@@ -102,8 +100,8 @@ function Selects() {
                         filterSort={(optionA, optionB) =>
                             (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
                         }
-                        options={modelsList}
-                        onChange={(value: any, option: any) => changeSelects(value, option, item.index)}
+                        options={modelList}
+                        onChange={(value, option) => changeSelects(value, option, item.index)}
                 /><CloseOutlined onClick={() => onRemoveModel(item.index)}/>
             </div>
         })
@@ -113,7 +111,6 @@ function Selects() {
             </div>
         )
     }
-
 
     return (
         <div className="main">
