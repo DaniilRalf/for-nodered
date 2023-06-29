@@ -74,10 +74,8 @@ const DeviceForm = (_props: any): JSX.Element => {
         {value: AllPropertyEnum.Vendor, label: AllPropertyEnum.Vendor},]
     const [activeProperty, setActiveProperty] = useState<AllPropertyEnum>()
 
-
     const [forSelectList, setForSelectList] = useState<ModelListInterface[]>([])
     const [selectedList, setSelectedList] = useState<QuantityModelInterface[]>([])
-
 
     const [preloader, setPreloader] = useState<boolean>(false)
 
@@ -95,6 +93,12 @@ const DeviceForm = (_props: any): JSX.Element => {
             if (propertyType && propertyList) {
                 setActiveProperty(propertyType as AllPropertyEnum)
                 setTimeout(() => setSelectedList(propertyList))
+                /** удаляем эоементы из списка*/
+                setTimeout((): void => {
+                    propertyList.forEach((value: QuantityModelInterface): void => {
+                        setForSelectList(prevList => prevList.filter(item => item.value !== value.value));
+                    })
+                })
             }
         }, [])
 
@@ -109,7 +113,6 @@ const DeviceForm = (_props: any): JSX.Element => {
                     {value: 'test3', label: 'test3'},
                     {value: 'test4', label: 'test4'},
                 ]
-                setForSelectList(testList)
             } else if (activeProperty === AllPropertyEnum.Model) {
                 setSelectedList([{index: Date.parse(new Date().toISOString()), value: ''}])
                 const testList: ModelListInterface[] = [
@@ -141,9 +144,11 @@ const DeviceForm = (_props: any): JSX.Element => {
         const onAddModel = (): void => {
             setSelectedList([...selectedList, {index: Date.parse(new Date().toISOString()), value: ''}])
         }
-        const onRemoveModel = (elem: number): void => {
+        const onRemoveModel = (elem: number, value: any): void => {
             const newArray = [...selectedList].filter((item: any) => item.index !== elem )
             setSelectedList(newArray)
+            /** добавляем элементы в список*/
+            setForSelectList([...forSelectList, {value: value, label: value}])
         }
         const changeSelects = (value: any, option: any, index: number): void => {
             const newArray = selectedList.map(item => {
@@ -153,11 +158,11 @@ const DeviceForm = (_props: any): JSX.Element => {
                 return item
             })
             setSelectedList(newArray)
+            /** удаляем эоементы из списка*/
+            setForSelectList(prevList => prevList.filter(item => item.value !== value));
         }
         const checkDisableBtn = (): boolean => {
-            if ((selectedList.length > 0 && selectedList[selectedList.length - 1].value) || selectedList.length === 0) {
-                return false
-            } else return true
+            return !((selectedList.length > 0 && selectedList[selectedList.length - 1].value) || selectedList.length === 0);
         }
     /** SELECT LIST=======================================================================*/
 
@@ -175,7 +180,7 @@ const DeviceForm = (_props: any): JSX.Element => {
                         options={forSelectList}
                         onChange={(value, option) => changeSelects(value, option, item.index)}
                         value={selectedList[index].value}
-                /><DeleteOutlined rev="true" onClick={() => onRemoveModel(item.index)}/>
+                /><DeleteOutlined rev="true" onClick={() => onRemoveModel(item.index, item.value)}/>
             </div>
         })
         return (
@@ -189,7 +194,6 @@ const DeviceForm = (_props: any): JSX.Element => {
     // TODO: добавить переводя во всю верстку в том числе и в лейблы
     return (
         <div className="main">
-
             <div className="main-select">
                 <Select
                     showSearch style={{ width: 300, marginBottom: '30px' }}
@@ -203,15 +207,11 @@ const DeviceForm = (_props: any): JSX.Element => {
                     value={activeProperty}
                 />
             </div>
-
-
             {!activeProperty && preloader && <div className="main-preloader">
                 <Space size="middle">
                     <Spin size="large" />
                 </Space>
             </div>}
-
-
             {activeProperty && <div className="main-body">
                 {constructSelectList()}
                 <Button  style={customStyle.addModelBtn} icon={<PlusOutlined rev="true"/>}
@@ -220,8 +220,6 @@ const DeviceForm = (_props: any): JSX.Element => {
                          disabled={checkDisableBtn()}
                 >Добавить {activeProperty}</Button>
             </div>}
-
-
             <style>{customStyleMaterial}</style>
         </div>
     )
