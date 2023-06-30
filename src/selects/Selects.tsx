@@ -5,6 +5,7 @@ import { Select } from 'antd'
 import { Button } from 'antd'
 import { Space, Spin } from 'antd'
 import { PlusOutlined, DeleteOutlined, TagOutlined } from '@ant-design/icons'
+import { serverLogic } from "./server_logic";
 
 // const i18nMessagePrefix = 'vendor_routing.'
 
@@ -43,7 +44,7 @@ const customStyleMaterial = `
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 30px;
-                margin-right: 10px;
+                margin-right: 35px;
                 
            }
         }
@@ -111,6 +112,7 @@ const DeviceForm = (_props: any): JSX.Element => {
             //         })
             //     })
             // }
+            serverLogic()
         }, [])
 
         /** каждый раз при изменении выбранного свойства для роутинга запрашиваем список данных*/
