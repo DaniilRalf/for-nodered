@@ -74,6 +74,7 @@ const DeviceForm = (_props: any): JSX.Element => {
         {value: AllPropertyEnum.Vendor, label: AllPropertyEnum.Vendor},]
     const [activeProperty, setActiveProperty] = useState<AllPropertyEnum>()
 
+    const [viewList, setViewList] = useState<ModelListInterface[]>([])
     const [forSelectList, setForSelectList] = useState<ModelListInterface[]>([])
     const [selectedList, setSelectedList] = useState<QuantityModelInterface[]>([])
 
@@ -84,22 +85,22 @@ const DeviceForm = (_props: any): JSX.Element => {
         useEffect((): void => {
             //TODO: вот на этом моменте делаем запрос и получаем все модели, но перед этим подтягиваем все данные из сохраненой ноды
 
-            const propertyType: string = 'model'
-            const propertyList: QuantityModelInterface[] = [
-                {index: 1688011764336, value: 'test1'},
-                {index: 1688011766336, value: 'test0'},
-                {index: 1688011769496, value: 'test3'},
-            ]
-            if (propertyType && propertyList) {
-                setActiveProperty(propertyType as AllPropertyEnum)
-                setTimeout(() => setSelectedList(propertyList))
-                /** удаляем эоементы из списка*/
-                setTimeout((): void => {
-                    propertyList.forEach((value: QuantityModelInterface): void => {
-                        setForSelectList(prevList => prevList.filter(item => item.value !== value.value));
-                    })
-                })
-            }
+            // const propertyType: string = 'model'
+            // const propertyList: QuantityModelInterface[] = [
+            //     {index: 1688011764336, value: 'test1'},
+            //     {index: 1688011766336, value: 'test0'},
+            //     {index: 1688011769496, value: 'test3'},
+            // ]
+            // if (propertyType && propertyList) {
+            //     setActiveProperty(propertyType as AllPropertyEnum)
+            //     setTimeout(() => setSelectedList(propertyList))
+            //     /** удаляем эоементы из списка*/
+            //     setTimeout((): void => {
+            //         propertyList.forEach((value: QuantityModelInterface): void => {
+            //             setForSelectList(prevList => prevList.filter(item => item.value !== value.value));
+            //         })
+            //     })
+            // }
         }, [])
 
         /** каждый раз при изменении выбранного свойства для роутинга запрашиваем список данных*/
@@ -113,6 +114,8 @@ const DeviceForm = (_props: any): JSX.Element => {
                     {value: 'test3', label: 'test3'},
                     {value: 'test4', label: 'test4'},
                 ]
+                setForSelectList(testList)
+                setViewList(testList)
             } else if (activeProperty === AllPropertyEnum.Model) {
                 setSelectedList([{index: Date.parse(new Date().toISOString()), value: ''}])
                 const testList: ModelListInterface[] = [
@@ -123,6 +126,7 @@ const DeviceForm = (_props: any): JSX.Element => {
                     {value: 'test4', label: 'test4'},
                 ]
                 setForSelectList(testList)
+                setViewList(testList)
             }
         }, [activeProperty])
 
@@ -130,7 +134,7 @@ const DeviceForm = (_props: any): JSX.Element => {
         useEffect((): void => {
             const sortQuantityModel = selectedList.filter((itemModel: QuantityModelInterface) => !!itemModel.value)
             //TODO: вот на этом моменте отсортировали все елементы которые не содержат value и сохранять в глобальную область видимости
-            console.log(sortQuantityModel)
+            //console.log(sortQuantityModel)
         }, [selectedList])
     /** GLOBAL FUNCTION===================================================================*/
 
@@ -148,7 +152,8 @@ const DeviceForm = (_props: any): JSX.Element => {
             const newArray = [...selectedList].filter((item: any) => item.index !== elem )
             setSelectedList(newArray)
             /** добавляем элементы в список*/
-            setForSelectList([...forSelectList, {value: value, label: value}])
+            // setForSelectList([...forSelectList, {value: value, label: value}])
+            setViewList([...viewList, {value: value, label: value}])
         }
         const changeSelects = (value: any, option: any, index: number): void => {
             const newArray = selectedList.map(item => {
@@ -159,7 +164,16 @@ const DeviceForm = (_props: any): JSX.Element => {
             })
             setSelectedList(newArray)
             /** удаляем эоементы из списка*/
-            setForSelectList(prevList => prevList.filter(item => item.value !== value));
+            // setForSelectList(prevList => prevList.filter(item => item.value !== value));
+
+            const newArr = forSelectList.filter(obj => {
+                    const count = selectedList.filter(item => item.value === obj.value).length;
+                    return count === 0;
+            })
+            setViewList(newArr)
+            // console.log('-----------------------------------')
+            // console.log(newArr)
+            // console.log('-----------------------------------')
         }
         const checkDisableBtn = (): boolean => {
             return !((selectedList.length > 0 && selectedList[selectedList.length - 1].value) || selectedList.length === 0);
@@ -177,7 +191,7 @@ const DeviceForm = (_props: any): JSX.Element => {
                         filterSort={(optionA, optionB) =>
                             (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
                         }
-                        options={forSelectList}
+                        options={viewList}
                         onChange={(value, option) => changeSelects(value, option, item.index)}
                         value={selectedList[index].value}
                 /><DeleteOutlined rev="true" onClick={() => onRemoveModel(item.index, item.value)}/>
