@@ -4,7 +4,7 @@ import React, { ReactElement, useEffect, useState } from 'react'
 import { Select } from 'antd'
 import { Button } from 'antd'
 import { Space, Spin } from 'antd'
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined, TagOutlined } from '@ant-design/icons'
 
 // const i18nMessagePrefix = 'vendor_routing.'
 
@@ -17,6 +17,8 @@ enum AllPropertyEnum {Model = 'model', Vendor = 'vendor'}
 /** STYLES=================================================================================*/
 const customStyleMaterial = `
         .main {
+            font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji';
+        
            ::-webkit-scrollbar {
                 width: 7px;
                 height: 7px;
@@ -35,6 +37,14 @@ const customStyleMaterial = `
                 align-items: center;
                 justify-content: center;
                 margin-bottom: 10px;
+           }
+           .main-select {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                margin-right: 10px;
+                
            }
         }
     `
@@ -209,8 +219,11 @@ const DeviceForm = (_props: any): JSX.Element => {
     return (
         <div className="main">
             <div className="main-select">
+                <div className="main-select-desc">
+                    <TagOutlined rev="true"/><div style={{display: "inline-block", marginLeft: '7px'}}>Модель</div>
+                </div>
                 <Select
-                    showSearch style={{ width: 300, marginBottom: '30px' }}
+                    showSearch style={{ width: 350 }}
                     placeholder="Выберите свойства для роутинга" optionFilterProp="children"
                     filterOption={(input, option) => (option?.label ?? '').includes(input)}
                     filterSort={(optionA, optionB) =>
