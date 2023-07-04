@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import {
     DataGrid,
     GridCellParams,
-    GridColDef,
-    GridRenderCellParams,
+    GridColDef, GridColumnHeaderParams,
+    GridRenderCellParams, GridValidRowModel,
     GridValueGetterParams
 } from '@mui/x-data-grid'
 import { Autocomplete, AutocompleteRenderInputParams, Button, Chip, TextField } from "@mui/material"
@@ -32,10 +32,9 @@ const customStyle = {
         minWidth: '300px'
     },
     table: {
-        height: "auto",
-        maxHeight: 400,
+        maxHeight: 380,
         width: '100%',
-        marginBottom: 50
+        marginBottom: 15
     },
     chip: {
         backgroundColor: '#ececec',
@@ -52,15 +51,14 @@ const customStyle = {
 }
 
 const customStyleMaterial = `
-    .MuiDataGrid-menuList {
-        display: flex;
-        flex-direction: column;
-    }
-    .MuiDataGrid-selectedRowCount {
-        display: none;
-    }
-  
+     p, div {font-size: 13px!important}
+    .MuiDataGrid-menuList {display: flex;flex-direction: column;}
+    .MuiDataGrid-selectedRowCount {display: none;}
+    .MuiMenuItem-root:first-child {display: none;}
+    .MuiDataGrid-panelFooter {display: none;}
     .ant-pagination {transform: translateY(-43px)}
+    
+    .MuiDataGrid-columnsPanel > *:nth-child(-n+2) { .MuiSwitch-root {display: none;}}
 `
 
 const localePagination = {
@@ -98,7 +96,7 @@ interface RowType {
     virtual: boolean,
 }
 const columnsConfigMain: GridColDef[] = [
-    {field: 'uuid', headerName: 'uuid', width: 290, description: 'Test desc', sortable: false},
+    {field: 'uuid', headerName: 'uuid', width: 290, description: 'Test desc', sortable: false, },
     {field: 'name', headerName: 'Device name', width: 110, description: 'Test desc', sortable: false},
     {field: 'vendor', headerName: 'Vendor', width: 100, description: 'Test desc', sortable: false},
     {field: 'model', headerName: 'Model', width: 130, description: 'Test desc', sortable: false},
@@ -114,6 +112,16 @@ const columnsConfigMain: GridColDef[] = [
     },
 ]
 const columnsConfigSelect: GridColDef[] = [
+    {
+        field: 'remove',
+        headerName: '',
+        width: 130,
+        description: '',
+        sortable: false,
+        renderCell: (_params: GridRenderCellParams<any>) =>
+            (<><PhonelinkEraseIcon style={{cursor: 'pointer'}} /></>),
+        renderHeader: () => (<><PhonelinkEraseIcon style={{cursor: 'pointer'}} /></>)
+    },
     {field: 'uuid', headerName: 'uuid', width: 290, description: 'Test desc', sortable: false},
     {field: 'name', headerName: 'Device name', width: 110, description: 'Test desc', sortable: false},
     {field: 'vendor', headerName: 'Vendor', width: 100, description: 'Test desc', sortable: false},
@@ -127,9 +135,6 @@ const columnsConfigSelect: GridColDef[] = [
             params.row.accounts.map((itemAccount: string): string => inputData + ` ${itemAccount}`)
             return inputData
         },
-    },
-    {field: 'remove', headerName: '', width: 130, description: '', sortable: false, renderCell: (_params: GridRenderCellParams<any>) =>
-            (<><PhonelinkEraseIcon style={{cursor: 'pointer'}} /></>)
     },
 ]
 const rowsTest: RowType[] = [
@@ -199,9 +204,9 @@ function Tables() {
             setDataSelectTable(selectedRows)
         }
     }
-    function deleteCheckboxFromSelectTable(itemRow: string): void {
+    function deleteCheckboxFromSelectTable(itemRow: string[]): void {
         if (dataMainTable) {
-            const selectedRowsNew: string[] = selectedRows.filter((uuid: string) => uuid !== itemRow)
+            const selectedRowsNew: string[] = selectedRows.filter((uuid: string) => !itemRow.includes(uuid))
             handleSelectionModelChange(selectedRowsNew)
         }
     }
@@ -210,10 +215,14 @@ function Tables() {
     //     // console.log(params)
     // }
     /** event and options for autocomplete*/
+    const [virtualSelectValue, setVirtualSelectValue] = useState<string | null>('')
+
     const defaultPropsAutocompleteMainTable = {
         options: (allChipsMainTable.slice(-1)[0]?.detail === 'tag') ? [] : FOR_FILTER_MAIN_TABLE,
         getOptionLabel: (option: string) => option,
+        value: virtualSelectValue,
     }
+
     const changeAutocompleteMainTable = (event: any): void => {
         /** делаем асинхронно, чтобы выбранный чипс из селекта успел встать в инпут*/
         setTimeout(() => {
@@ -222,18 +231,17 @@ function Tables() {
                 /** functionality for serial saving chips and tags*/
                 if (FOR_FILTER_MAIN_TABLE.includes(inputData) && !(allChipsMainTable.slice(-1)[0])) {
                     setAllChipsMainTable([...allChipsMainTable, {detail: 'tag', value: inputData}])
-                    event.target.value = ''
                     /** удаляем значение из общего массива чтобы не отображать элемент в Селекте*/
                     FOR_FILTER_MAIN_TABLE = FOR_FILTER_MAIN_TABLE.filter((item) => item !== inputData)
                 } else if (allChipsMainTable.slice(-1)[0]?.detail === 'tag') {
                     setAllChipsMainTable([...allChipsMainTable, {detail: 'chip', value: inputData}])
-                    event.target.value = ''
                 } else if (allChipsMainTable.slice(-1)[0]?.detail === 'chip' && FOR_FILTER_MAIN_TABLE.includes(inputData)) {
                     setAllChipsMainTable([...allChipsMainTable, {detail: 'tag', value: inputData}])
-                    event.target.value = ''
                     /** удаляем значение из общего массива чтобы не отображать элемент в Селекте*/
                     FOR_FILTER_MAIN_TABLE = FOR_FILTER_MAIN_TABLE.filter((item) => item !== inputData)
                 }
+                event.target.value = ''
+                setVirtualSelectValue('')
             }
         }, 100)
     }
@@ -278,77 +286,77 @@ function Tables() {
 
 
     /** SELECT table function===================================================================*/
-    /** paginator change*/
-    function handlePageChangeSelectTable(params: { page: number, pageSize: number }): void {
-        // console.log(params)
-    }
-    /** event and options for autocomplete*/
-    const defaultPropsAutocompleteSelectTable = {
-        options: (allChipsSelectTable.slice(-1)[0]?.detail === 'tag') ? [] : FOR_FILTER_SELECT_TABLE,
-        getOptionLabel: (option: string) => option,
-    }
-    const changeAutocompleteSelectTable = (event: any): void => {
-        /** делаем асинхронно, чтобы выбранный чипс из селекта успел встать в инпут*/
-        setTimeout(() => {
-            const inputData: string = event.target.value
-            if (inputData) {
-                /** functionality for serial saving chips and tags*/
-                if (FOR_FILTER_SELECT_TABLE.includes(inputData) && !(allChipsSelectTable.slice(-1)[0])) {
-                    setAllChipsSelectTable([...allChipsSelectTable, {detail: 'tag', value: inputData}])
-                    event.target.value = ''
-                    /** удаляем значение из общего массива чтобы не отображать элемент в Селекте*/
-                    FOR_FILTER_SELECT_TABLE = FOR_FILTER_SELECT_TABLE.filter((item) => item !== inputData)
-                } else if (allChipsSelectTable.slice(-1)[0]?.detail === 'tag') {
-                    setAllChipsSelectTable([...allChipsSelectTable, {detail: 'chip', value: inputData}])
-                    event.target.value = ''
-                    generateDataForFiltered([...allChipsSelectTable, {detail: 'chip', value: inputData}], 'select') /** фильтруем таблицу*/
-                } else if (allChipsSelectTable.slice(-1)[0]?.detail === 'chip' && FOR_FILTER_SELECT_TABLE.includes(inputData)) {
-                    setAllChipsSelectTable([...allChipsSelectTable, {detail: 'tag', value: inputData}])
-                    event.target.value = ''
-                    /** удаляем значение из общего массива чтобы не отображать элемент в Селекте*/
-                    FOR_FILTER_SELECT_TABLE = FOR_FILTER_SELECT_TABLE.filter((item) => item !== inputData)
-                }
-            }
-        }, 100)
-    }
-    /** event and options for chips*/
-    const handleDeleteSelectTable = (deleteChip: { detail: string, value: string }, indexElement: number): void => {
-        const allElementsAfterDelete = [...allChipsSelectTable]
-        if (deleteChip.detail === 'chip') {
-            /** добавление элементом назад в массив*/
-            FOR_FILTER_SELECT_TABLE.push(allElementsAfterDelete[indexElement - 1].value)
-            allElementsAfterDelete.splice((indexElement - 1), 2)
-            generateDataForFiltered(allElementsAfterDelete, 'select') /** фильтруем таблицу*/
-        } else if (deleteChip.detail === 'tag') {
-            /** добавление элементом назад в массив*/
-            FOR_FILTER_SELECT_TABLE.push(deleteChip.value)
-            allElementsAfterDelete.splice(indexElement, 1)
-        }
-        setAllChipsSelectTable(allElementsAfterDelete)
-        setTimeout(() => {
-            const test: any = document.querySelector('.select_table input')
-            test.value = ''
-        })
-    }
-    const generateChipsSelectTable = allChipsSelectTable.map((itemChips: { detail: string, value: string }, index: number) => {
-        if (itemChips.detail === 'tag') {
-            return (
-                <Chip key={index} label={itemChips.value}
-                      style={allChipsSelectTable.length > index + 1
-                          ? customStyle.tagSplice
-                          : customStyle.tagOnce}
-                      onDelete={allChipsSelectTable.length > index + 1 ? undefined : () => handleDeleteSelectTable(itemChips, index)}
-                />
-            )
-        } else {
-            return (
-                <Chip key={index} label={itemChips.value}
-                      style={customStyle.chip}
-                      onDelete={() => handleDeleteSelectTable(itemChips, index)}
-                />
-            )
-        }
-    })
+    // /** paginator change*/
+    // function handlePageChangeSelectTable(params: { page: number, pageSize: number }): void {
+    //     // console.log(params)
+    // }
+    // /** event and options for autocomplete*/
+    // const defaultPropsAutocompleteSelectTable = {
+    //     options: (allChipsSelectTable.slice(-1)[0]?.detail === 'tag') ? [] : FOR_FILTER_SELECT_TABLE,
+    //     getOptionLabel: (option: string) => option,
+    // }
+    // const changeAutocompleteSelectTable = (event: any): void => {
+    //     /** делаем асинхронно, чтобы выбранный чипс из селекта успел встать в инпут*/
+    //     setTimeout(() => {
+    //         const inputData: string = event.target.value
+    //         if (inputData) {
+    //             /** functionality for serial saving chips and tags*/
+    //             if (FOR_FILTER_SELECT_TABLE.includes(inputData) && !(allChipsSelectTable.slice(-1)[0])) {
+    //                 setAllChipsSelectTable([...allChipsSelectTable, {detail: 'tag', value: inputData}])
+    //                 event.target.value = ''
+    //                 /** удаляем значение из общего массива чтобы не отображать элемент в Селекте*/
+    //                 FOR_FILTER_SELECT_TABLE = FOR_FILTER_SELECT_TABLE.filter((item) => item !== inputData)
+    //             } else if (allChipsSelectTable.slice(-1)[0]?.detail === 'tag') {
+    //                 setAllChipsSelectTable([...allChipsSelectTable, {detail: 'chip', value: inputData}])
+    //                 event.target.value = ''
+    //                 generateDataForFiltered([...allChipsSelectTable, {detail: 'chip', value: inputData}], 'select') /** фильтруем таблицу*/
+    //             } else if (allChipsSelectTable.slice(-1)[0]?.detail === 'chip' && FOR_FILTER_SELECT_TABLE.includes(inputData)) {
+    //                 setAllChipsSelectTable([...allChipsSelectTable, {detail: 'tag', value: inputData}])
+    //                 event.target.value = ''
+    //                 /** удаляем значение из общего массива чтобы не отображать элемент в Селекте*/
+    //                 FOR_FILTER_SELECT_TABLE = FOR_FILTER_SELECT_TABLE.filter((item) => item !== inputData)
+    //             }
+    //         }
+    //     }, 100)
+    // }
+    // /** event and options for chips*/
+    // const handleDeleteSelectTable = (deleteChip: { detail: string, value: string }, indexElement: number): void => {
+    //     const allElementsAfterDelete = [...allChipsSelectTable]
+    //     if (deleteChip.detail === 'chip') {
+    //         /** добавление элементом назад в массив*/
+    //         FOR_FILTER_SELECT_TABLE.push(allElementsAfterDelete[indexElement - 1].value)
+    //         allElementsAfterDelete.splice((indexElement - 1), 2)
+    //         generateDataForFiltered(allElementsAfterDelete, 'select') /** фильтруем таблицу*/
+    //     } else if (deleteChip.detail === 'tag') {
+    //         /** добавление элементом назад в массив*/
+    //         FOR_FILTER_SELECT_TABLE.push(deleteChip.value)
+    //         allElementsAfterDelete.splice(indexElement, 1)
+    //     }
+    //     setAllChipsSelectTable(allElementsAfterDelete)
+    //     setTimeout(() => {
+    //         const test: any = document.querySelector('.select_table input')
+    //         test.value = ''
+    //     })
+    // }
+    // const generateChipsSelectTable = allChipsSelectTable.map((itemChips: { detail: string, value: string }, index: number) => {
+    //     if (itemChips.detail === 'tag') {
+    //         return (
+    //             <Chip key={index} label={itemChips.value}
+    //                   style={allChipsSelectTable.length > index + 1
+    //                       ? customStyle.tagSplice
+    //                       : customStyle.tagOnce}
+    //                   onDelete={allChipsSelectTable.length > index + 1 ? undefined : () => handleDeleteSelectTable(itemChips, index)}
+    //             />
+    //         )
+    //     } else {
+    //         return (
+    //             <Chip key={index} label={itemChips.value}
+    //                   style={customStyle.chip}
+    //                   onDelete={() => handleDeleteSelectTable(itemChips, index)}
+    //             />
+    //         )
+    //     }
+    // })
     /** SELECT table function===================================================================*/
 
 
@@ -364,6 +372,10 @@ function Tables() {
     }
 
 
+    function test2 (test: any) {
+        console.log(test)
+    }
+
 
     return (
         <div className="App">
@@ -377,6 +389,7 @@ function Tables() {
                     </div>
                     <div style={customStyle.autocomplete}>
                         <Autocomplete
+                            onOpen={(e) =>setVirtualSelectValue(null)}
                             {...defaultPropsAutocompleteMainTable}
                             renderInput={(params: AutocompleteRenderInputParams) => (
                                 <TextField {...params} label="Поиск" variant="standard" />
@@ -398,19 +411,8 @@ function Tables() {
                         checkboxSelection
                         rowSelectionModel={selectedRows}
                         onRowSelectionModelChange={handleSelectionModelChange}
-
-
-
                     />}
-                    {/*{dataMainTable && <Pagination className="ant-pagination"*/}
-                    {/*                              defaultCurrent={3} //active page number*/}
-                    {/*                              total={450} //count all elements*/}
-                    {/*                              locale={localePagination}*/}
-                    {/*                              pageSizeOptions={[10, 25, 50]} //page sizer*/}
 
-                    {/*                              onShowSizeChange={onShowSizeChange} //change page-size*/}
-                    {/*                              onChange={onChange} //change page*/}
-                    {/*/>}*/}
                     {dataMainTable && <>
                         <Pagination
                             className="ant-pagination"
@@ -427,47 +429,26 @@ function Tables() {
             </div>
 
 
+
             <div className="select_table">
-                {/** filter table allData*/}
-                {dataSelectTable && dataSelectTable.length > 0 && <div style={customStyle.filter}>
-                    <div style={customStyle.chips}>
-                        {generateChipsSelectTable}
-                    </div>
-                    <div style={customStyle.autocomplete}>
-                        <Autocomplete
-                            {...defaultPropsAutocompleteSelectTable}
-                            renderInput={(params: AutocompleteRenderInputParams) => (
-                                <TextField {...params}
-                                           label="Поиск"
-                                           variant="standard"
-                                />
-                            )}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') changeAutocompleteSelectTable(e)
-                            }}
-                        />
-                    </div>
-                </div>}
                 {/** table with select data*/}
                 <div style={customStyle.table}>
                     {viewsSelectTable && viewsSelectTable.length > 0 && <DataGrid
                         getRowId={(row) => row.uuid}
                         rows={viewsSelectTable} columns={columnsConfigSelect}
-                        initialState={{
-                            pagination: {
-                                paginationModel: {page: 0, pageSize: 5},
-                            },
-                        }}
+
                         disableRowSelectionOnClick={true}
-                        pageSizeOptions={[2, 5, 10]}
                         disableColumnFilter={true}
-                        onPaginationModelChange={handlePageChangeSelectTable}
+                        hideFooterPagination={true}
 
                         onCellClick={(params: GridCellParams): void => {
                             if (params.field === 'remove') {
                                 const clickedRow = params.row.uuid
-                                deleteCheckboxFromSelectTable(clickedRow)
+                                deleteCheckboxFromSelectTable([clickedRow])
                             }
+                        }}
+                        onColumnHeaderClick={(param: GridColumnHeaderParams<GridValidRowModel, any, any>): void => {
+                            if (param.field === 'remove') deleteCheckboxFromSelectTable(selectedRows)
                         }}
                     />}
                 </div>
