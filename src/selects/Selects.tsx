@@ -222,7 +222,8 @@ const DeviceForm = (_props: any): JSX.Element => {
         <div className="main">
             <div className="main-select">
                 <div className="main-select-desc">
-                    <TagOutlined rev="true" style={{transform: 'rotate(-90deg)'}}/><div style={{display: "inline-block", marginLeft: '7px'}}>Модель</div>
+                    <TagOutlined rev="true" style={{transform: 'rotate(-90deg)'}}/>
+                    <div style={{display: "inline-block", marginLeft: '7px'}}>Модель</div>
                 </div>
                 <Select
                     showSearch style={{ width: 350 }}
