@@ -46,7 +46,7 @@ export const customStyleMaterial = `
                 .main-add-output {
                     margin-bottom: 30px;
                     display: flex;
-                    justify-content: end
+                    justify-content: start;
                 }
            }
            
@@ -68,6 +68,7 @@ export const customStyleMaterial = `
                             height: 18px;
                             margin-left: 7px;
                             cursor: pointer;
+                            transform: translateX(-5px)
                         }
                     }
                     
@@ -87,7 +88,6 @@ export const customStyleMaterial = `
                         }
                     }
                     
-                    .btn {}
                 }
            }
            

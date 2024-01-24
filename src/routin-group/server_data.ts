@@ -1,5 +1,26 @@
-export const serverData = ''
+export const serverDataModels = [
+    'CP-3905',
+    'CP-6901',
+    'CP-6911',
+    'CP-6921',
+    'CP-6941',
+]
+export const serverDataVendors: string[] = [
+    'Aastra',
+    'Cisco',
+    'D-Link',
+    'Fanvil',
+    'YealinkX',
+]
 
+export const serverDataProps: any = {
+    outputs: 3,
+    propertyType: 'model',
+    propertyList: [
+        {index: 123123123123, valueList: ['CP-3905']},
+        {index: 123123156723, valueList: ['CP-6901', 'CP-6941']}
+    ]
+}
 
 
 // export const serverLogic = () => {
