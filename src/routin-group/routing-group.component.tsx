@@ -46,7 +46,7 @@ const RoutingGroupComponent = (_props: any): JSX.Element =>  {
             if (data?.propertyList && data?.propertyType) {
                 setGroupsOutputsList(data?.propertyList)
                 setActiveProperty(data?.propertyType)
-                setTimeout(() => changeItemsForSelect(data?.propertyList), 100)
+                changeItemsForSelect(data?.propertyList)
             }
         })
     }, [])
@@ -130,10 +130,13 @@ const RoutingGroupComponent = (_props: any): JSX.Element =>  {
         newGroupsOutputsList.forEach((itemGroup: RoutingGroupInterface): void => {
             activeTags = [...activeTags, ...itemGroup.valueList]
         })
+
         console.log('====================')
         console.log(newGroupsOutputsList)
+        console.log(activeTags)
         console.log(dataForSelect)
         console.log('====================')
+
         let newDataForSelectView = JSON.parse(JSON.stringify(dataForSelect))
         newDataForSelectView = newDataForSelectView.filter((item: ModelListInterface) => !activeTags.includes(item.value))
         setDataForSelectView(newDataForSelectView)

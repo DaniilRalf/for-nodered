@@ -62,7 +62,7 @@ export const customStyleMaterial = `
                         display: flex;
                         opacity: 0.5;
                         .number {
-                            width: 100px; 
+                            min-width: 85px; 
                         }
                         .close {
                             height: 18px;
