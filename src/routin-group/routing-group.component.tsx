@@ -4,8 +4,8 @@ import {PlusOutlined, TagOutlined} from "@ant-design/icons"
 import {customStyleMaterial} from "./assets/styles"
 import {CloseOutlined} from "@material-ui/icons"
 import {serverDataModels, serverDataProps, serverDataVendors} from "./server_data"
+import _ from 'lodash'
 
-//TODO: может ли одно и то-же свойство быть присвоено нескольким выходам
 
 // TODO: перенести енам в основной файл с типами
 // TODO: соответствует RoutingGroupPropertyList
@@ -39,27 +39,32 @@ const RoutingGroupComponent = (_props: any): JSX.Element =>  {
 
     // TODO: на этом месте подставить данные из пропса, или пустой массив
     useEffect((): void => {
-        const promise: Promise<any> = new Promise((resolve, reject) => {
-            setTimeout(() => {resolve(serverDataProps)}, 500)
-        })
-        promise.then((data: any) => {
-            if (data?.propertyList && data?.propertyType) {
-                setGroupsOutputsList(data?.propertyList)
-                setActiveProperty(data?.propertyType)
-                changeItemsForSelect(data?.propertyList)
-            }
-        })
+
+        const data1 = serverDataProps
+        if (data1?.propertyList && data1?.propertyType) {
+            setActiveProperty(data1?.propertyType)
+        }
+
     }, [])
 
     // TODO: на этом месте отслеживаем активное Properties и запрашиваем каждый раз данные
-    useEffect(() => {
-        //TODO: switch-case
-        if (activeProperty === AllPropertyEnum.Vendor) {
-            getDataForSelect(AllPropertyEnum.Vendor).then()
-        } else if (activeProperty === AllPropertyEnum.Model) {
-            getDataForSelect(AllPropertyEnum.Model).then()
+    useEffect((): void => {
+        switch (activeProperty) {
+            case AllPropertyEnum.Vendor:
+                getDataForSelect(AllPropertyEnum.Vendor).then()
+                break
+            case AllPropertyEnum.Model:
+                getDataForSelect(AllPropertyEnum.Model).then()
+                break
         }
     }, [activeProperty])
+
+    /** формируем лист свойств для формирования выходов*/
+    useEffect((): void => {
+        if (activeProperty && groupsOutputsList) {
+            let newGroupsOutputsList = groupsOutputsList.filter((groupOutputs) => !!groupOutputs.valueList.length)
+        }
+    }, [groupsOutputsList, activeProperty])
 
     // TODO: получание данных с бека
     const getDataForSelect = async (property: AllPropertyEnum): Promise<void> => {
@@ -87,9 +92,19 @@ const RoutingGroupComponent = (_props: any): JSX.Element =>  {
             })
             await promise1.then((dataProm): void => {data = dataProm})
         }
-        const list: ModelListInterface[] = data.map((item: string): ModelListInterface => ({value: item, label: item}))
+        const list: ModelListInterface[] = data
+            .filter((el: string) => !!el)
+            .map((item: string): ModelListInterface => ({value: item, label: item}))
         setDataForSelect(list)
         setDataForSelectView(list)
+
+        // TODO: из пропсов дергаем данные и исопльзуем 1 раз для удаления активных тегов из доступного списка
+        let data1 = serverDataProps
+        if (data1?.propertyList) {
+            setGroupsOutputsList(data1?.propertyList)
+            changeItemsForSelect(data1?.propertyList, list)
+            data1.propertyList = null
+        }
     }
 
     /** Properties */
@@ -105,39 +120,35 @@ const RoutingGroupComponent = (_props: any): JSX.Element =>  {
     }
 
     const removeOutputsGroup = (indexGroup: number): void => {
-        const newGroupsOutputsList: RoutingGroupInterface[] = JSON.parse(JSON.stringify(groupsOutputsList))
+        // const newGroupsOutputsList: RoutingGroupInterface[] = JSON.parse(JSON.stringify(groupsOutputsList))
+        const newGroupsOutputsList: RoutingGroupInterface[] = _.cloneDeep(groupsOutputsList)
         newGroupsOutputsList.splice(indexGroup, 1)
         setGroupsOutputsList(newGroupsOutputsList)
-        changeItemsForSelect(newGroupsOutputsList)
+        changeItemsForSelect(newGroupsOutputsList, dataForSelect)
     }
 
     /** items of group (item in Select)*/
     const changeItemsOfGroup = (itemIndex: number, itemData: string[]): void => {
         /** изменение списка чипсов в переменной группы */
-        const newGroupsOutputsList = JSON.parse(JSON.stringify(groupsOutputsList))
+        // const newGroupsOutputsList = JSON.parse(JSON.stringify(groupsOutputsList))
+        const newGroupsOutputsList: RoutingGroupInterface[] = _.cloneDeep(groupsOutputsList)
         newGroupsOutputsList.forEach((group: RoutingGroupInterface): void => {
             if (itemIndex === group.index) {
                 group.valueList = [...itemData]
             }
         })
         setGroupsOutputsList(newGroupsOutputsList)
-        changeItemsForSelect(newGroupsOutputsList)
+        changeItemsForSelect(newGroupsOutputsList, dataForSelect)
     }
 
-    const changeItemsForSelect = (newGroupsOutputsList: RoutingGroupInterface[]): void => {
+    const changeItemsForSelect = (newGroupsOutputsList: RoutingGroupInterface[], dataForSelectArray: ModelListInterface[] ): void => {
         /** изменение списка чипсов в переменной для выбора */
         let activeTags: string[] = []
         newGroupsOutputsList.forEach((itemGroup: RoutingGroupInterface): void => {
             activeTags = [...activeTags, ...itemGroup.valueList]
         })
-
-        console.log('====================')
-        console.log(newGroupsOutputsList)
-        console.log(activeTags)
-        console.log(dataForSelect)
-        console.log('====================')
-
-        let newDataForSelectView = JSON.parse(JSON.stringify(dataForSelect))
+        // let newDataForSelectView = JSON.parse(JSON.stringify(dataForSelectArray))
+        let newDataForSelectView: ModelListInterface[] = _.cloneDeep(dataForSelectArray)
         newDataForSelectView = newDataForSelectView.filter((item: ModelListInterface) => !activeTags.includes(item.value))
         setDataForSelectView(newDataForSelectView)
     }
