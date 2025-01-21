@@ -215,7 +215,7 @@ const RoutingGroupComponent = (_props: any): JSX.Element =>  {
                     }
                     options={allProperty}
                     value={activeProperty}
-                    onChange={(value, option) => changeActiveProperty(value, option)}
+                    onChange={(value, option) => changeActiveProperty(value, option as any)}
                 />
             </div>
 
