@@ -1,9 +1,8 @@
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Table} from "antd"
 import Settings, {ColumnCustomType} from "./settings"
 import type { TableColumnsType } from 'antd'
 import {testData} from "./data"
-import {TableRowSelection} from "antd/es/table/interface";
 
 const COLUMNS_SETTINGS_DEFAULT: {hidden: false, ellipsis: true} = {
     hidden: false,
@@ -53,8 +52,23 @@ const TableTest = () => {
     useEffect(() => {
         setColumnsSettings(COLUMNS_SETTINGS)
         /** Добавляем ключи для корректной генерации компонента */
-        setTableData(testData.map((device, index: number) => ({...device, key: `${index}`})))
+        setTableData(testData.map((device, index: number) => ({...device, key: `${device.uuid}`})))
     }, [])
+
+
+
+
+    const dataTableSecond = useMemo(() => {
+        dataTable.forEach((device: any, index: number) => {
+            if (selectedRowKeys.includes(device.uuid)) {
+
+            }
+        })
+        return dataTable
+    }, [selectedRowKeys, dataTable])
+
+
+
 
     /**
      * ГЛАВНАЯ ТАБЛИЦА
@@ -73,18 +87,25 @@ const TableTest = () => {
         setSelectedRowKeys(newSelectedRowKeys)
     }, [])
 
-
-
     return (
         <div>
-            <Settings columns={columnsSettings as ColumnCustomType[]} onChangeColumn={onChangeColumn} />
-            <Table
-                dataSource={dataTable}
-                columns={columnsSettings}
-                size={'small'}
-                rowSelection={{selectedRowKeys, onChange: onSelectChange}}
-                pagination={{ position: ['bottomCenter'] }}
-            />
+            <Settings columns={columnsSettings as ColumnCustomType[]} onChangeColumn={onChangeColumn}/>
+            <div style={{border: '1px solid grey', borderRadius: '10px', margin: '20px 0 20px 0'}}>
+                <Table
+                    dataSource={dataTable}
+                    columns={columnsSettings}
+                    size={'small'}
+                    rowSelection={{selectedRowKeys, onChange: onSelectChange}}
+                    pagination={{position: ['bottomCenter']}}
+                />
+            </div>
+            <div style={{border: '1px solid grey', borderRadius: '10px', margin: '20px 0 20px 0'}}>
+                <Table
+                    dataSource={dataTableSecond}
+                    columns={columnsSettings}
+                    size={'small'}
+                />
+            </div>
         </div>
     )
 }
