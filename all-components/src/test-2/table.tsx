@@ -1,46 +1,58 @@
-import React from 'react'
-import {Dropdown, MenuProps, Space, Table} from "antd";
-import Settings from "./settings";
+import React, {useEffect} from 'react'
+import {Table} from "antd";
+import Settings, {ColumnCustomType} from "./settings";
+import type { TableColumnsType } from 'antd';
+import {testData} from "./data";
+
+const COLUMNS_SETTINGS_DEFAULT: {hidden: false, ellipsis: true} = {
+    hidden: false,
+    ellipsis: true,
+}
+
+const COLUMNS_SETTINGS: TableColumnsType = [
+    {
+        title: 'UUID',
+        dataIndex: 'uuid',
+        key: '0',
+        ...COLUMNS_SETTINGS_DEFAULT
+    },
+    {
+        title: 'Name',
+        dataIndex: 'name',
+        key: '1',
+        ...COLUMNS_SETTINGS_DEFAULT
+    },
+    {
+        title: 'Vendor',
+        dataIndex: 'vendor',
+        key: '2',
+        ...COLUMNS_SETTINGS_DEFAULT
+    },
+    {
+        title: 'Mac',
+        dataIndex: 'mac',
+        key: '3',
+        ...COLUMNS_SETTINGS_DEFAULT
+    },
+]
 
 const TableTest = () => {
 
-    const dataSource = [
-        {
-            key: '1',
-            name: 'Mike',
-            age: 32,
-            address: '10 Downing Street',
-        },
-        {
-            key: '2',
-            name: 'John',
-            age: 42,
-            address: '10 Downing Street',
-        },
-    ];
+    const [columnsSettings, setColumnsSettings] = React.useState<TableColumnsType>([])
 
-    const columns = [
-        {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
-        },
-        {
-            title: 'Address',
-            dataIndex: 'address',
-            key: 'address',
-        },
-        {
-            title: 'Age',
-            dataIndex: 'age',
-            key: 'age',
-        },
-    ]
+    const [dataTable, setTableData] = React.useState<any>([])
+
+    /** Первичная загрузка данных, реализовать тут запросы к АПИ*/
+    useEffect(() => {
+        setColumnsSettings(COLUMNS_SETTINGS)
+        /** Добавляем ключи для корректной генерации компонента */
+        setTableData(testData.map((device, index: number) => ({...device, key: `${index}`})))
+    }, [])
 
     return (
         <div>
-            <Settings />
-            <Table dataSource={dataSource} columns={columns} />
+            <Settings columns={columnsSettings as ColumnCustomType[]} />
+            <Table dataSource={dataTable} columns={columnsSettings} size={'small'} />
         </div>
     )
 }

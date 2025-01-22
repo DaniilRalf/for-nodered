@@ -1,40 +1,46 @@
-import React, { useState, useCallback } from 'react';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { Dropdown } from 'antd';
-import type { MenuProps } from 'antd';
+import React, {useState, useCallback, useMemo, useEffect} from 'react'
+import { DndProvider, useDrag, useDrop } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import {Dropdown} from 'antd'
+import {ColumnType} from "antd/es/table/interface";
 
-const ItemType = 'MENU_ITEM';
+const ItemType = 'MENU_ITEM'
+
+export type ColumnCustomType = ColumnType & {title: string}
 
 type DraggableMenuItemType = {
-    item: { label: string; key?: string };
-    index: number;
-    moveMenuItem: (fromIndex: number, toIndex: number) => void;
-};
+    item: ColumnCustomType
+    index: number
+    dropdownItemEvent: (fromIndex: number, toIndex: number) => void
+}
 
-const DraggableMenuItem = React.memo(({ item, index, moveMenuItem }: DraggableMenuItemType) => {
-    const ref = React.useRef<HTMLDivElement>(null);
+const DraggableMenuItem = React.memo(({ item, index, dropdownItemEvent }: DraggableMenuItemType) => {
+
+    console.log('----------------------')
+    console.log(item)
+    console.log('----------------------')
+
+    const ref = React.useRef<HTMLDivElement>(null)
 
     const [, drag] = useDrag({
         type: ItemType,
         item: { index },
-    });
+    })
 
     const [, drop] = useDrop({
         accept: ItemType,
         hover: (draggedItem: { index: number }) => {
             if (draggedItem.index !== index) {
-                moveMenuItem(draggedItem.index, index);
-                draggedItem.index = index;
+                dropdownItemEvent(draggedItem.index, index)
+                draggedItem.index = index
             }
         },
-    });
+    })
 
-    drag(drop(ref));
+    drag(drop(ref))
 
     return (
         <div
-            ref={ref}
             style={{
                 padding: '8px',
                 border: '1px solid #ccc',
@@ -43,6 +49,7 @@ const DraggableMenuItem = React.memo(({ item, index, moveMenuItem }: DraggableMe
             }}
         >
             <div
+                ref={ref}
                 style={{
                     marginRight: '20px',
                     cursor: 'move',
@@ -50,53 +57,64 @@ const DraggableMenuItem = React.memo(({ item, index, moveMenuItem }: DraggableMe
             >
                 drop
             </div>
-            <div>{item.label}</div>
+            <div>{item.title}</div>
         </div>
-    );
-});
+    )
+})
 
-const Settings = () => {
-    const [menuItems, setMenuItems] = useState([
-        { label: '1st menu item' },
-        { label: '2nd menu item' },
-    ]);
+const Settings = ({columns}: { columns: ColumnCustomType[] }) => {
 
-    const moveMenuItem = useCallback((fromIndex: number, toIndex: number) => {
-        setMenuItems((prevItems) => {
-            const updatedItems = [...prevItems];
-            const [movedItem] = updatedItems.splice(fromIndex, 1);
-            updatedItems.splice(toIndex, 0, movedItem);
-            return updatedItems;
-        });
-    }, []);
+    const [menuItems, setMenuItems] = useState(columns)
 
-    const items: MenuProps['items'] = menuItems.map((item, index) => ({
-        key: `${index}`,
-        label: (
-            <DraggableMenuItem
-                key={index}
-                index={index}
-                item={item}
-                moveMenuItem={moveMenuItem}
-            />
-        ),
-    }));
+    useEffect(() => {
+        setMenuItems(columns)
+    }, [columns])
+
+    const dropdownItemEvent = useCallback((fromIndex: number, toIndex: number) => {
+        setMenuItems((prevItems: ColumnCustomType[]) => {
+            const updatedItems = [...prevItems]
+            const [movedItem] = updatedItems.splice(fromIndex, 1)
+            updatedItems.splice(toIndex, 0, movedItem)
+            return updatedItems
+        })
+    }, [])
+
+    const dropdownList = useMemo(() => {
+        return menuItems.map((item: ColumnCustomType, index: number) => {
+            return {
+                key: `${index}`,
+                label: (
+                    <DraggableMenuItem
+                        key={index}
+                        index={index}
+                        item={item}
+                        dropdownItemEvent={dropdownItemEvent}
+                    />
+                ),
+            }
+        })
+    }, [menuItems])
 
     return (
-        <DndProvider backend={HTML5Backend}>
-            <Dropdown menu={{ items }} trigger={['click']}>
-                <div
-                    style={{
-                        padding: '8px',
-                        border: '1px solid #ccc',
-                        cursor: 'pointer',
-                    }}
-                >
-                    Click me
-                </div>
-            </Dropdown>
-        </DndProvider>
-    );
-};
+        <>
+            {
+                columns?.length && <DndProvider backend={HTML5Backend}>
+                    <Dropdown menu={{ items: dropdownList }} trigger={['click']}>
+                        <div
+                            style={{
+                                width: '40px',
+                                padding: '8px',
+                                border: '1px solid #ccc',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Click me
+                        </div>
+                    </Dropdown>
+                </DndProvider>
+            }
+        </>
+    )
+}
 
-export default Settings;
+export default Settings
