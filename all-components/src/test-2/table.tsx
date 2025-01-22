@@ -1,8 +1,9 @@
-import React, {useCallback, useEffect} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {Table} from "antd"
 import Settings, {ColumnCustomType} from "./settings"
 import type { TableColumnsType } from 'antd'
 import {testData} from "./data"
+import {TableRowSelection} from "antd/es/table/interface";
 
 const COLUMNS_SETTINGS_DEFAULT: {hidden: false, ellipsis: true} = {
     hidden: false,
@@ -26,7 +27,8 @@ const COLUMNS_SETTINGS: TableColumnsType = [
         title: 'Vendor',
         dataIndex: 'vendor',
         key: '2',
-        ...COLUMNS_SETTINGS_DEFAULT
+        ...COLUMNS_SETTINGS_DEFAULT,
+        hidden: true
     },
     {
         title: 'Mac',
@@ -38,9 +40,14 @@ const COLUMNS_SETTINGS: TableColumnsType = [
 
 const TableTest = () => {
 
+    /** Конфигурация колонок */
     const [columnsSettings, setColumnsSettings] = React.useState<TableColumnsType>([])
 
+    /** Данные для главной таблицы */
     const [dataTable, setTableData] = React.useState<any>([])
+
+    /** Выбранные строки главной таблицы */
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
     /** Первичная загрузка данных, реализовать тут запросы к АПИ*/
     useEffect(() => {
@@ -49,14 +56,35 @@ const TableTest = () => {
         setTableData(testData.map((device, index: number) => ({...device, key: `${index}`})))
     }, [])
 
+    /**
+     * ГЛАВНАЯ ТАБЛИЦА
+     * Метод для изменения положения колонок
+     * */
     const onChangeColumn = useCallback((column: ColumnCustomType[]) => {
         setColumnsSettings(column)
     }, [])
 
+    /**
+     * ГЛАВНАЯ ТАБЛИЦА
+     * Метод для изменения чекбоксов
+     * */
+    const onSelectChange = useCallback((newSelectedRowKeys: React.Key[]) => {
+        console.log('selectedRowKeys changed: ', newSelectedRowKeys)
+        setSelectedRowKeys(newSelectedRowKeys)
+    }, [])
+
+
+
     return (
         <div>
             <Settings columns={columnsSettings as ColumnCustomType[]} onChangeColumn={onChangeColumn} />
-            <Table dataSource={dataTable} columns={columnsSettings} size={'small'} />
+            <Table
+                dataSource={dataTable}
+                columns={columnsSettings}
+                size={'small'}
+                rowSelection={{selectedRowKeys, onChange: onSelectChange}}
+                pagination={{ position: ['bottomCenter'] }}
+            />
         </div>
     )
 }
