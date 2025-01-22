@@ -1,8 +1,8 @@
-import React, {useEffect} from 'react'
-import {Table} from "antd";
-import Settings, {ColumnCustomType} from "./settings";
-import type { TableColumnsType } from 'antd';
-import {testData} from "./data";
+import React, {useCallback, useEffect} from 'react'
+import {Table} from "antd"
+import Settings, {ColumnCustomType} from "./settings"
+import type { TableColumnsType } from 'antd'
+import {testData} from "./data"
 
 const COLUMNS_SETTINGS_DEFAULT: {hidden: false, ellipsis: true} = {
     hidden: false,
@@ -49,9 +49,13 @@ const TableTest = () => {
         setTableData(testData.map((device, index: number) => ({...device, key: `${index}`})))
     }, [])
 
+    const onChangeColumn = useCallback((column: ColumnCustomType[]) => {
+        setColumnsSettings(column)
+    }, [])
+
     return (
         <div>
-            <Settings columns={columnsSettings as ColumnCustomType[]} />
+            <Settings columns={columnsSettings as ColumnCustomType[]} onChangeColumn={onChangeColumn} />
             <Table dataSource={dataTable} columns={columnsSettings} size={'small'} />
         </div>
     )
