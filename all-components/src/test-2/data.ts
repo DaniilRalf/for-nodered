@@ -288,18 +288,28 @@ export const COLUMNS_SETTINGS: TableColumnsType = [
         title: 'UUID',
         dataIndex: 'uuid',
         key: '0',
+        width: 320,
         ...COLUMNS_SETTINGS_DEFAULT
     },
     {
         title: 'Name',
         dataIndex: 'name',
         key: '1',
+        width: 200,
         ...COLUMNS_SETTINGS_DEFAULT
     },
+    // {
+    //     title: 'Description',
+    //     dataIndex: 'description',
+    //     key: '1',
+    //     width: 200,
+    //     ...COLUMNS_SETTINGS_DEFAULT
+    // },
     {
         title: 'Vendor',
         dataIndex: 'vendor',
         key: '2',
+        width: 200,
         ...COLUMNS_SETTINGS_DEFAULT,
         hidden: true
     },
@@ -307,6 +317,7 @@ export const COLUMNS_SETTINGS: TableColumnsType = [
         title: 'Mac',
         dataIndex: 'mac',
         key: '3',
+        width: 200,
         ...COLUMNS_SETTINGS_DEFAULT
     },
 ]
