@@ -8,12 +8,6 @@ const ItemType = 'MENU_ITEM'
 
 const DraggableMenuItem = React.memo(({ item, index, dropdownItemEvent }: DraggableMenuItemType) => {
 
-    const [checkboxState, setCheckboxState] = useState<boolean>(false)
-
-    useEffect(() => {
-        setCheckboxState(!item.hidden)
-    }, [])
-
     const ref = React.useRef<HTMLDivElement>(null)
 
     const [, drag] = useDrag({
@@ -31,11 +25,9 @@ const DraggableMenuItem = React.memo(({ item, index, dropdownItemEvent }: Dragga
         },
     })
 
-    const onChangeCheckbox = (event: CheckboxChangeEvent, item: ColumnCustomType) => {
+    const onChangeCheckbox = (event: CheckboxChangeEvent) => {
         const newCheckboxState = event.target.checked
-        setCheckboxState(newCheckboxState)
-        item.hidden = !newCheckboxState
-        dropdownItemEvent(0, 0, item)
+        dropdownItemEvent(0, 0, { ...item, hidden: !newCheckboxState })
     }
 
     drag(drop(ref))
@@ -59,8 +51,8 @@ const DraggableMenuItem = React.memo(({ item, index, dropdownItemEvent }: Dragga
                 drop
             </div>
             <Checkbox
-                checked={checkboxState}
-                onChange={(event: CheckboxChangeEvent) => onChangeCheckbox(event, item)}
+                checked={!item.hidden}
+                onChange={onChangeCheckbox}
             />
             <div>{item.title}</div>
         </div>
@@ -87,13 +79,19 @@ const Settings = React.memo(({columns, onChangeColumn}: { columns: ColumnCustomT
     const dropdownItemEvent = useCallback((fromIndex: number, toIndex: number, itemNew?: ColumnCustomType) => {
         setMenuItems((prevItems: ColumnCustomType[]) => {
             const updatedItems = [...prevItems]
-            if (!itemNew) {
+    
+            if (itemNew) {
+                /** Создаем новый объект для измененного элемента (изменили состояние чекбокса) */
+                const updatedIndex = updatedItems.findIndex(item => item.key === itemNew.key)
+                if (updatedIndex !== -1) {
+                    updatedItems[updatedIndex] = { ...updatedItems[updatedIndex], hidden: itemNew.hidden }
+                }
+            } else {
+                /** Меняем элементы местами (сделали Drag-and-drop) */
                 const [movedItem] = updatedItems.splice(fromIndex, 1)
                 updatedItems.splice(toIndex, 0, movedItem)
-            } else {
-                const foundItem = updatedItems.find(item => item.key === itemNew.key)
-                foundItem!.hidden = itemNew.hidden
             }
+    
             return updatedItems
         })
     }, [])
