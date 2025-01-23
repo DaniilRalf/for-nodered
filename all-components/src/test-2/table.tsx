@@ -1,41 +1,8 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {Table} from "antd"
-import Settings, {ColumnCustomType} from "./settings"
-import type { TableColumnsType } from 'antd'
-import {testData} from "./data"
-
-const COLUMNS_SETTINGS_DEFAULT: {hidden: false, ellipsis: true} = {
-    hidden: false,
-    ellipsis: true,
-}
-
-const COLUMNS_SETTINGS: TableColumnsType = [
-    {
-        title: 'UUID',
-        dataIndex: 'uuid',
-        key: '0',
-        ...COLUMNS_SETTINGS_DEFAULT
-    },
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        key: '1',
-        ...COLUMNS_SETTINGS_DEFAULT
-    },
-    {
-        title: 'Vendor',
-        dataIndex: 'vendor',
-        key: '2',
-        ...COLUMNS_SETTINGS_DEFAULT,
-        hidden: true
-    },
-    {
-        title: 'Mac',
-        dataIndex: 'mac',
-        key: '3',
-        ...COLUMNS_SETTINGS_DEFAULT
-    },
-]
+import React, {useCallback, useEffect, useState} from 'react'
+import {Checkbox, Table} from "antd"
+import Settings from "./settings"
+import type { CheckboxChangeEvent, TableColumnsType } from 'antd'
+import {ColumnCustomType, COLUMNS_SETTINGS, testData} from "./data"
 
 const TableTest = () => {
 
@@ -43,7 +10,8 @@ const TableTest = () => {
     const [columnsSettings, setColumnsSettings] = React.useState<TableColumnsType>([])
 
     /** Данные для главной таблицы */
-    const [dataTable, setTableData] = React.useState<any>([])
+    const [dataTable, setDataTable] = React.useState<any>([])
+    const [dataTableSecond, setDataTableSecond] = React.useState<any>([])
 
     /** Выбранные строки главной таблицы */
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
@@ -52,23 +20,37 @@ const TableTest = () => {
     useEffect(() => {
         setColumnsSettings(COLUMNS_SETTINGS)
         /** Добавляем ключи для корректной генерации компонента */
-        setTableData(testData.map((device, index: number) => ({...device, key: `${device.uuid}`})))
+        setDataTable(testData.map((device, index: number) => ({...device, key: `${device.uuid}`})))
     }, [])
 
+    /**
+     * ГЛАВНАЯ ТАБЛИЦА
+     * Метод для генерации и управления чекбоксами
+     * */
+    const testtest = (checked: boolean, record: any, _index: number, _originNode: React.ReactNode): React.ReactNode => {
+        // Определяем, выбран ли данный элемент
+        const isSelected = selectedRowKeys.includes(record.key)
+        // Обработчик изменения состояния чекбокса
+        const onCheckboxChange = (e: CheckboxChangeEvent | React.ChangeEvent<HTMLInputElement>) => {
+            if (e.target.checked) {
+                // Добавляем ключ строки в список выбранных
+                setSelectedRowKeys([...selectedRowKeys, record.key])
 
+                setDataTableSecond((prevData: any) => ([...prevData, record]))
+            } else {
+                // Убираем ключ строки из списка выбранных
+                setSelectedRowKeys(selectedRowKeys.filter((key) => key !== record.key))
 
-
-    const dataTableSecond = useMemo(() => {
-        dataTable.forEach((device: any, index: number) => {
-            if (selectedRowKeys.includes(device.uuid)) {
-
+                setDataTableSecond((prevData: any) => prevData.filter((device: any) => device.uuid !== record.key))
             }
-        })
-        return dataTable
-    }, [selectedRowKeys, dataTable])
-
-
-
+        }
+        return (
+            <Checkbox
+                checked={isSelected}
+                onChange={onCheckboxChange}
+            />
+        )
+    }
 
     /**
      * ГЛАВНАЯ ТАБЛИЦА
@@ -76,15 +58,6 @@ const TableTest = () => {
      * */
     const onChangeColumn = useCallback((column: ColumnCustomType[]) => {
         setColumnsSettings(column)
-    }, [])
-
-    /**
-     * ГЛАВНАЯ ТАБЛИЦА
-     * Метод для изменения чекбоксов
-     * */
-    const onSelectChange = useCallback((newSelectedRowKeys: React.Key[]) => {
-        console.log('selectedRowKeys changed: ', newSelectedRowKeys)
-        setSelectedRowKeys(newSelectedRowKeys)
     }, [])
 
     return (
@@ -95,7 +68,8 @@ const TableTest = () => {
                     dataSource={dataTable}
                     columns={columnsSettings}
                     size={'small'}
-                    rowSelection={{selectedRowKeys, onChange: onSelectChange}}
+                
+                    rowSelection={{selectedRowKeys, renderCell: testtest}}
                     pagination={{position: ['bottomCenter']}}
                 />
             </div>
@@ -104,6 +78,7 @@ const TableTest = () => {
                     dataSource={dataTableSecond}
                     columns={columnsSettings}
                     size={'small'}
+                    pagination={false}
                 />
             </div>
         </div>

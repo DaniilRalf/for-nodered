@@ -2,17 +2,9 @@ import React, {useState, useCallback, useMemo, useEffect} from 'react'
 import { DndProvider, useDrag, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import {Checkbox, CheckboxChangeEvent, Dropdown} from 'antd'
-import {ColumnType} from "antd/es/table/interface"
+import { ColumnCustomType, DraggableMenuItemType } from './data'
 
 const ItemType = 'MENU_ITEM'
-
-export type ColumnCustomType = ColumnType & {title: string}
-
-type DraggableMenuItemType = {
-    item: ColumnCustomType
-    index: number
-    dropdownItemEvent: (fromIndex: number, toIndex: number, itemNew?: ColumnCustomType) => void
-}
 
 const DraggableMenuItem = React.memo(({ item, index, dropdownItemEvent }: DraggableMenuItemType) => {
 

@@ -1,3 +1,16 @@
+import { TableColumnsType } from "antd"
+import { ColumnType } from "antd/es/table"
+
+export type ColumnCustomType = ColumnType & {title: string}
+
+export type DraggableMenuItemType = {
+    item: ColumnCustomType
+    index: number
+    dropdownItemEvent: (fromIndex: number, toIndex: number, itemNew?: ColumnCustomType) => void
+}
+
+
+
 export const testData = [
     {
         "accounts": [
@@ -263,4 +276,37 @@ export const testData = [
         "vendor": "YealinkX",
         "virtual": false
     }
+]
+
+const COLUMNS_SETTINGS_DEFAULT: {hidden: false, ellipsis: true} = {
+    hidden: false,
+    ellipsis: true,
+}
+
+export const COLUMNS_SETTINGS: TableColumnsType = [
+    {
+        title: 'UUID',
+        dataIndex: 'uuid',
+        key: '0',
+        ...COLUMNS_SETTINGS_DEFAULT
+    },
+    {
+        title: 'Name',
+        dataIndex: 'name',
+        key: '1',
+        ...COLUMNS_SETTINGS_DEFAULT
+    },
+    {
+        title: 'Vendor',
+        dataIndex: 'vendor',
+        key: '2',
+        ...COLUMNS_SETTINGS_DEFAULT,
+        hidden: true
+    },
+    {
+        title: 'Mac',
+        dataIndex: 'mac',
+        key: '3',
+        ...COLUMNS_SETTINGS_DEFAULT
+    },
 ]
