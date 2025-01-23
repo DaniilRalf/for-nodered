@@ -3,6 +3,7 @@ import {Checkbox, Table} from "antd"
 import Settings from "./settings"
 import type { CheckboxChangeEvent, TableColumnsType } from 'antd'
 import {ColumnCustomType, COLUMNS_SETTINGS, testData} from "./data"
+import { DeleteOutline } from '@material-ui/icons'
 
 const TableTest = () => {
 
@@ -25,31 +26,26 @@ const TableTest = () => {
 
     /**
      * ГЛАВНАЯ ТАБЛИЦА
-     * Метод для генерации и управления чекбоксами
+     * Метод для генерации и управления чекбоксами в строках
      * */
-    const testtest = (checked: boolean, record: any, _index: number, _originNode: React.ReactNode): React.ReactNode => {
-        // Определяем, выбран ли данный элемент
+    const renderCheckboxRowMainTable = (_checked: boolean, record: any, _index: number, _originNode: React.ReactNode): React.ReactNode => {
+        /** Определяем, выбран ли данный элемент */
         const isSelected = selectedRowKeys.includes(record.key)
-        // Обработчик изменения состояния чекбокса
+        /** Обработчик изменения состояния чекбокса */
         const onCheckboxChange = (e: CheckboxChangeEvent | React.ChangeEvent<HTMLInputElement>) => {
             if (e.target.checked) {
-                // Добавляем ключ строки в список выбранных
+                /** Добавляем ключ строки в список выбранных */
                 setSelectedRowKeys([...selectedRowKeys, record.key])
-
+                /** Корректируем состав второй таблицы */    
                 setDataTableSecond((prevData: any) => ([...prevData, record]))
             } else {
-                // Убираем ключ строки из списка выбранных
+                /** Убираем ключ строки из списка выбранных */
                 setSelectedRowKeys(selectedRowKeys.filter((key) => key !== record.key))
-
+                /** Корректируем состав второй таблицы */
                 setDataTableSecond((prevData: any) => prevData.filter((device: any) => device.uuid !== record.key))
             }
         }
-        return (
-            <Checkbox
-                checked={isSelected}
-                onChange={onCheckboxChange}
-            />
-        )
+        return <Checkbox checked={isSelected} onChange={onCheckboxChange} />
     }
 
     /**
@@ -60,6 +56,30 @@ const TableTest = () => {
         setColumnsSettings(column)
     }, [])
 
+    /**
+     * ВТОРОСТЕПЕННАЯ ТАБЛИЦА
+     * Метод для генерации и управления чекбоксами в строках
+     * */
+    const renderCheckboxRowSecondTable = (_checked: boolean, record: any, _index: number, _originNode: React.ReactNode): React.ReactNode => {
+        const onClickOnDelete = () => {
+            setDataTableSecond((prevDara: any) => prevDara.filter((device: any) => device.key !== record.key))
+            setSelectedRowKeys((prevDara: React.Key[]) => prevDara.filter((uuid: React.Key) => uuid !== record.key))
+        } 
+        return <div style={{cursor: 'pointer'}} onClick={onClickOnDelete}><DeleteOutline /></div>
+    }
+
+    /**
+     * ВТОРОСТЕПЕННАЯ ТАБЛИЦА
+     * Метод для генерации и управления чекбоксом в шапке
+     * */
+    const renderCheckboxHeaderSecondTable = (_originNode: React.ReactNode): React.ReactNode => {
+        const onClickOnDelete = () => {
+            setDataTableSecond([])
+            setSelectedRowKeys([])
+        } 
+        return <div style={{cursor: 'pointer'}} onClick={onClickOnDelete}><DeleteOutline /></div>
+    }
+
     return (
         <div>
             <Settings columns={columnsSettings as ColumnCustomType[]} onChangeColumn={onChangeColumn}/>
@@ -68,9 +88,8 @@ const TableTest = () => {
                     dataSource={dataTable}
                     columns={columnsSettings}
                     size={'small'}
-                
-                    rowSelection={{selectedRowKeys, renderCell: testtest}}
                     pagination={{position: ['bottomCenter']}}
+                    rowSelection={{selectedRowKeys, renderCell: renderCheckboxRowMainTable}}
                 />
             </div>
             <div style={{border: '1px solid grey', borderRadius: '10px', margin: '20px 0 20px 0'}}>
@@ -79,6 +98,7 @@ const TableTest = () => {
                     columns={columnsSettings}
                     size={'small'}
                     pagination={false}
+                    rowSelection={{renderCell: renderCheckboxRowSecondTable, columnTitle: renderCheckboxHeaderSecondTable}}
                 />
             </div>
         </div>
