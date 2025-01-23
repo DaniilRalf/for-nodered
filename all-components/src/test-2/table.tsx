@@ -26,7 +26,7 @@ const TableTest = () => {
 
     /**
      * ГЛАВНАЯ ТАБЛИЦА
-     * Метод для генерации и управления чекбоксами в строках
+     * Метод для генерации чекбоксов в строках
      * */
     const renderCheckboxRowMainTable = (_checked: boolean, record: any, _index: number, _originNode: React.ReactNode): React.ReactNode => {
         /** Определяем, выбран ли данный элемент */
@@ -50,11 +50,36 @@ const TableTest = () => {
 
     /**
      * ГЛАВНАЯ ТАБЛИЦА
+     * Метод для управления чекбоксами в строках и в шапке
+     * */
+    const onMainTableSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys)
+        /** Синхронизация данных для второй таблицы */
+        const selectedRows = dataTable.filter((row:any) => newSelectedRowKeys.includes(row.key))
+        setDataTableSecond(selectedRows)
+    }
+
+    /**
+     * ГЛАВНАЯ ТАБЛИЦА
      * Метод для изменения положения колонок
      * */
     const onChangeColumn = useCallback((column: ColumnCustomType[]) => {
         setColumnsSettings(column)
     }, [])
+
+    /**
+     * ВТОРОСТЕПЕННАЯ ТАБЛИЦА
+     * Метод для генерации и управления чекбоксом в шапке
+     * */
+    const renderCheckboxHeaderSecondTable = (_originNode: React.ReactNode): React.ReactNode => {
+        const onClickOnDelete = () => {
+            if (dataTableSecond.length && selectedRowKeys.length) {
+                setDataTableSecond([])
+                setSelectedRowKeys([])
+            }
+        } 
+        return <div style={{cursor: 'pointer'}} onClick={onClickOnDelete}><DeleteOutline /></div>
+    }
 
     /**
      * ВТОРОСТЕПЕННАЯ ТАБЛИЦА
@@ -68,18 +93,6 @@ const TableTest = () => {
         return <div style={{cursor: 'pointer'}} onClick={onClickOnDelete}><DeleteOutline /></div>
     }
 
-    /**
-     * ВТОРОСТЕПЕННАЯ ТАБЛИЦА
-     * Метод для генерации и управления чекбоксом в шапке
-     * */
-    const renderCheckboxHeaderSecondTable = (_originNode: React.ReactNode): React.ReactNode => {
-        const onClickOnDelete = () => {
-            setDataTableSecond([])
-            setSelectedRowKeys([])
-        } 
-        return <div style={{cursor: 'pointer'}} onClick={onClickOnDelete}><DeleteOutline /></div>
-    }
-
     return (
         <div>
             <Settings columns={columnsSettings as ColumnCustomType[]} onChangeColumn={onChangeColumn}/>
@@ -89,7 +102,7 @@ const TableTest = () => {
                     columns={columnsSettings}
                     size={'small'}
                     pagination={{position: ['bottomCenter']}}
-                    rowSelection={{selectedRowKeys, renderCell: renderCheckboxRowMainTable}}
+                    rowSelection={{selectedRowKeys, renderCell: renderCheckboxRowMainTable, onChange: onMainTableSelectChange,}}
                 />
             </div>
             <div style={{border: '1px solid grey', borderRadius: '10px', margin: '20px 0 20px 0'}}>
