@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from 'react'
 import {Checkbox, Table} from "antd"
 import Settings from "./settings"
 import type { CheckboxChangeEvent, TableColumnsType } from 'antd'
-import {ColumnCustomType, COLUMNS_SETTINGS, testData} from "./data"
+import {ColumnCustomType, COLUMNS_SETTINGS, localePagination, testData} from "./data"
 import { DeleteOutline } from '@material-ui/icons'
 
 const TableTest = () => {
@@ -52,11 +52,24 @@ const TableTest = () => {
      * ГЛАВНАЯ ТАБЛИЦА
      * Метод для управления чекбоксами в строках и в шапке
      * */
-    const onMainTableSelectChange = (newSelectedRowKeys: React.Key[]) => {
-        setSelectedRowKeys(newSelectedRowKeys)
-        /** Синхронизация данных для второй таблицы */
-        const selectedRows = dataTable.filter((row:any) => newSelectedRowKeys.includes(row.key))
-        setDataTableSecond(selectedRows)
+    const renderCheckboxHeaderMainTable = (): React.ReactNode => {
+        const isAllSelected = selectedRowKeys.length === dataTable.length && dataTable.length > 0
+        const isIndeterminate = selectedRowKeys.length > 0 && selectedRowKeys.length < dataTable.length
+        const onHeaderCheckboxChange = (e: CheckboxChangeEvent) => {
+            if (e.target.checked) {
+                /** Выбрать все строки */
+                const allKeys = dataTable.map((row: any) => row.key)
+                setSelectedRowKeys(allKeys)
+                setDataTableSecond(dataTable) // Синхронизируем вторую таблицу
+            } else {
+                /** Снять выделение со всех строк */
+                setSelectedRowKeys([])
+                setDataTableSecond([])
+            }
+        }
+        return (
+            <Checkbox indeterminate={isIndeterminate} checked={isAllSelected} onChange={onHeaderCheckboxChange} />
+        )
     }
 
     /**
@@ -95,25 +108,47 @@ const TableTest = () => {
 
     return (
         <div>
+
             <Settings columns={columnsSettings as ColumnCustomType[]} onChangeColumn={onChangeColumn}/>
-            <div style={{border: '1px solid grey', borderRadius: '10px', margin: '20px 0 20px 0'}}>
-                <Table
-                    dataSource={dataTable}
-                    columns={columnsSettings}
-                    size={'small'}
-                    pagination={{position: ['bottomCenter']}}
-                    rowSelection={{selectedRowKeys, renderCell: renderCheckboxRowMainTable, onChange: onMainTableSelectChange,}}
-                />
-            </div>
-            <div style={{border: '1px solid grey', borderRadius: '10px', margin: '20px 0 20px 0'}}>
-                <Table
-                    dataSource={dataTableSecond}
-                    columns={columnsSettings}
-                    size={'small'}
-                    pagination={false}
-                    rowSelection={{renderCell: renderCheckboxRowSecondTable, columnTitle: renderCheckboxHeaderSecondTable}}
-                />
-            </div>
+
+            {dataTable?.length ?
+                <div style={{border: '1px solid grey', borderRadius: '10px', margin: '20px 0 20px 0'}}>
+                    <Table
+                        dataSource={dataTable}
+                        columns={columnsSettings}
+                        size={'small'}
+                        pagination={{
+                            position: ['bottomCenter'],
+                            size: 'default',
+                            showQuickJumper: true,
+                            locale: localePagination,
+                            // pageSize: 5,
+                            total: 300,
+                            pageSizeOptions: [5, 10, 100]
+                        }}
+                        rowSelection={{
+                            selectedRowKeys,
+                            renderCell: renderCheckboxRowMainTable,
+                            columnTitle: renderCheckboxHeaderMainTable
+                        }}
+                    />
+                </div> : <div>There are no available devices</div>
+            }
+
+            {dataTableSecond?.length ?
+                <div style={{border: '1px solid grey', borderRadius: '10px', margin: '20px 0 20px 0'}}>
+                    <Table
+                        dataSource={dataTableSecond}
+                        columns={columnsSettings}
+                        size={'small'}
+                        pagination={false}
+                        rowSelection={{
+                            renderCell: renderCheckboxRowSecondTable,
+                            columnTitle: renderCheckboxHeaderSecondTable
+                        }}
+                    />
+                </div> : (!!dataTable?.length && <div>There are no selected devices</div>)}
+
         </div>
     )
 }

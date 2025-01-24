@@ -10,6 +10,21 @@ export type DraggableMenuItemType = {
 }
 
 
+export const localePagination = {
+    /** Быстрый переход по страницам */
+    items_per_page: '',
+    jump_to: 'Go to',
+    jump_to_confirm: 'confirm',
+    page: 'page',
+    /** Переключение страниц */
+    prev_page: 'Previous Page',
+    next_page: 'Next Page',
+    prev_5: 'Previous 5 Pages',
+    next_5: 'Next 5 Pages',
+    prev_3: 'Previous 3 Pages',
+    next_3: 'Next 3 Pages',
+    page_size: 'Page Size',
+}
 
 export const testData = [
     {
@@ -79,6 +94,72 @@ export const testData = [
         "virtual": false
     },
     {
+        "accounts": [
+            {
+                "accountTags": [
+                    {
+                        "tag": "sssss2",
+                        "uuid": "8f353d76-bb3a-4a87-b154-b521098e9d88"
+                    },
+                    {
+                        "tag": "fdfdf",
+                        "uuid": "10dfb41a-238c-4425-96a0-85498e12fc28"
+                    },
+                    {
+                        "tag": "fdfdfgg",
+                        "uuid": "f3f398df-bab0-4d59-bab4-a151dd357dec"
+                    }
+                ],
+                "account_id": null,
+                "email": "5",
+                "firstName": "5",
+                "lastName": "5",
+                "system": false,
+                "type": "local",
+                "uuid": "cfbca806-e62e-4fff-b3bf-6aecb7eed91e"
+            },
+            {
+                "accountTags": [],
+                "account_id": null,
+                "email": null,
+                "firstName": "fвфвы",
+                "lastName": "f",
+                "system": false,
+                "type": "local",
+                "uuid": "3ef76352-097f-45b4-b694-87978aff424b"
+            },
+            {
+                "accountTags": [],
+                "account_id": null,
+                "email": null,
+                "firstName": "тест тест",
+                "lastName": "r",
+                "system": false,
+                "type": "local",
+                "uuid": "07a192ac-2a93-4953-8298-9179a6db6a07"
+            }
+        ],
+        "aliases": [
+            {
+                "ip": "10.25.88.134",
+                "mac": "80:5e:c0:7a:d5:52"
+            }
+        ],
+        "description": "test",
+        "deviceTags": [],
+        "firmwareInfo": "108.86.0.45",
+        "lastRequestDatetime": "2024-12-04 06:08:22Z",
+        "model": "SIP-T48U",
+        "name": "test!!11111укук",
+        "provide": "U",
+        "registerDatetime": "2024-12-04 06:00:21Z",
+        "type": "VOIP_PHONE",
+        "updatedAt": "2025-01-13 06:56:42.481269Z",
+        "uuid": "f4f1c6ad-0e33-4634-8dd6-1514e845ffab",
+        "vendor": "YealinkX",
+        "virtual": false
+    },
+    {
         "accounts": [],
         "aliases": [
             {
@@ -96,7 +177,7 @@ export const testData = [
         "registerDatetime": "2024-11-08 06:39:41Z",
         "type": "VOIP_PHONE",
         "updatedAt": "2024-11-22 16:03:40.287033Z",
-        "uuid": "97d09dc1-b277-4df3-8132-f4f7003fd646",
+        "uuid": "97d09dc1-b277-4df3-8132-f417003fd646",
         "vendor": "YealinkX",
         "virtual": false
     },
@@ -118,7 +199,139 @@ export const testData = [
         "registerDatetime": "2024-11-08 06:39:40Z",
         "type": "VOIP_PHONE",
         "updatedAt": "2025-01-10 08:31:14.349737Z",
-        "uuid": "35dca73c-21bc-4122-a306-5e2cdc9bb0b5",
+        "uuid": "35dca73c-21bc-4522-a306-5e2c1c9bb0b5",
+        "vendor": "YealinkX",
+        "virtual": false
+    },
+    {
+        "accounts": [
+            {
+                "accountTags": [
+                    {
+                        "tag": "sssss2",
+                        "uuid": "8f353d76-bb3a-4a87-b154-b521098e9d88"
+                    },
+                    {
+                        "tag": "fdfdf",
+                        "uuid": "10dfb41a-238c-4425-96a0-85498e12fc28"
+                    },
+                    {
+                        "tag": "fdfdfgg",
+                        "uuid": "f3f398df-bab0-4d59-bab4-a151dd357dec"
+                    }
+                ],
+                "account_id": null,
+                "email": "5",
+                "firstName": "5",
+                "lastName": "5",
+                "system": false,
+                "type": "local",
+                "uuid": "cfbca806-e62e-4fff-b3bf-6aecb7eed91e"
+            },
+            {
+                "accountTags": [],
+                "account_id": null,
+                "email": null,
+                "firstName": "fвфвы",
+                "lastName": "f",
+                "system": false,
+                "type": "local",
+                "uuid": "3ef76352-097f-45b4-b694-87978aff424b"
+            },
+            {
+                "accountTags": [],
+                "account_id": null,
+                "email": null,
+                "firstName": "тест тест",
+                "lastName": "r",
+                "system": false,
+                "type": "local",
+                "uuid": "07a192ac-2a93-4953-8298-9179a6db6a07"
+            }
+        ],
+        "aliases": [
+            {
+                "ip": "10.25.88.134",
+                "mac": "80:5e:c0:7a:d5:52"
+            }
+        ],
+        "description": "test",
+        "deviceTags": [],
+        "firmwareInfo": "108.86.0.45",
+        "lastRequestDatetime": "2024-12-04 06:08:22Z",
+        "model": "SIP-T48U",
+        "name": "test!!11111укук",
+        "provide": "U",
+        "registerDatetime": "2024-12-04 06:00:21Z",
+        "type": "VOIP_PHONE",
+        "updatedAt": "2025-01-13 06:56:42.481269Z",
+        "uuid": "f4f1c6ad-1e33-4634-8dd6-15541845ffab",
+        "vendor": "YealinkX",
+        "virtual": false
+    },
+    {
+        "accounts": [
+            {
+                "accountTags": [
+                    {
+                        "tag": "sssss2",
+                        "uuid": "8f353d76-bb3a-4a87-b154-b521098e9d88"
+                    },
+                    {
+                        "tag": "fdfdf",
+                        "uuid": "10dfb41a-238c-4425-96a0-85498e12fc28"
+                    },
+                    {
+                        "tag": "fdfdfgg",
+                        "uuid": "f3f398df-bab0-4d59-bab4-a151dd357dec"
+                    }
+                ],
+                "account_id": null,
+                "email": "5",
+                "firstName": "5",
+                "lastName": "5",
+                "system": false,
+                "type": "local",
+                "uuid": "cfbca806-e62e-4fff-b3bf-6aecb7eed91e"
+            },
+            {
+                "accountTags": [],
+                "account_id": null,
+                "email": null,
+                "firstName": "fвфвы",
+                "lastName": "f",
+                "system": false,
+                "type": "local",
+                "uuid": "3ef76352-097f-45b4-b694-87978aff424b"
+            },
+            {
+                "accountTags": [],
+                "account_id": null,
+                "email": null,
+                "firstName": "тест тест",
+                "lastName": "r",
+                "system": false,
+                "type": "local",
+                "uuid": "07a192ac-2a93-4953-8298-9179a6db6a07"
+            }
+        ],
+        "aliases": [
+            {
+                "ip": "10.25.88.134",
+                "mac": "80:5e:c0:7a:d5:52"
+            }
+        ],
+        "description": "test",
+        "deviceTags": [],
+        "firmwareInfo": "108.86.0.45",
+        "lastRequestDatetime": "2024-12-04 06:08:22Z",
+        "model": "SIP-T48U",
+        "name": "test!!11111укук",
+        "provide": "U",
+        "registerDatetime": "2024-12-04 06:00:21Z",
+        "type": "VOIP_PHONE",
+        "updatedAt": "2025-01-13 06:56:42.481269Z",
+        "uuid": "f4f1c6ad-0e33-4634-8dd6-1554e145ffa1",
         "vendor": "YealinkX",
         "virtual": false
     },
